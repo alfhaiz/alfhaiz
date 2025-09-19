@@ -17,30 +17,11 @@ body { font-family: var(--font-family); background-color: var(--bg-sidebar); col
 .app-container, .main-content { height: 100dvh; height: -webkit-fill-available; }
 .app-container { display: flex; width: 100vw; }
 
-/* --- SIDEBAR --- */
+/* --- SIDEBAR & OVERLAY --- */
 .sidebar { background-color: var(--bg-sidebar); width: 260px; padding: 16px; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); transition: transform 0.3s ease; z-index: 1000; border-right: 1px solid var(--border-color); }
 .sidebar-open .sidebar { transform: translateX(0); }
-
-/* --- DI SINI PERBAIKANNYA --- */
-.sidebar-overlay { 
-    position: fixed; 
-    inset: 0; 
-    background-color: rgba(0,0,0,0.5); 
-    opacity: 0; 
-    visibility: hidden; 
-    transition: opacity 0.3s ease, visibility 0.3s ease; 
-    z-index: 999;
-    /* DITAMBAHKAN: Memastikan overlay tidak bisa di-klik saat tersembunyi */
-    pointer-events: none; 
-}
-.sidebar-open .sidebar-overlay { 
-    opacity: 1; 
-    visibility: visible;
-    /* DITAMBAHKAN: Mengaktifkan kembali klik saat sidebar terbuka */
-    pointer-events: auto; 
-}
-/* --- AKHIR PERBAIKAN --- */
-
+.sidebar-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 999; pointer-events: none; }
+.sidebar-open .sidebar-overlay { opacity: 1; visibility: visible; pointer-events: auto; }
 .sidebar-header .logo { font-size: 22px; font-weight: 700; padding: 12px 8px; }
 .sidebar-nav { overflow-y: auto; flex-grow: 1; }
 .nav-section-title { font-size: 11px; color: var(--text-secondary); padding: 24px 8px 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -89,6 +70,7 @@ body { font-family: var(--font-family); background-color: var(--bg-sidebar); col
 .message pre { background-color: #F3F4F6; padding: 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
 .message code { font-family: 'Courier New', Courier, monospace; background-color: #e5e7eb; padding: 2px 4px; border-radius: 4px; }
 .message pre code { background-color: transparent; padding: 0; }
+.message img { max-width: 100%; border-radius: 8px; margin-top: 8px; } /* Gaya untuk gambar di dalam pesan */
 
 /* --- INPUT AREA --- */
 .input-area { padding: 8px 16px 16px; background-color: var(--bg-main); flex-shrink: 0; }
@@ -102,4 +84,39 @@ textarea { flex-grow: 1; padding: 8px; border: none; outline: none; resize: none
 .attach-btn { background-color: transparent; color: var(--text-secondary); }
 .attach-btn:hover { background-color: #F3F4F6; }
 .attach-btn svg { width: 22px; height: 22px; }
-.attachment-preview { font-size: 12px; color: var(--text-secondary); padding: 8px 16px 0; }
+
+/* DITAMBAHKAN: Gaya untuk Pratinjau File */
+.attachment-preview {
+    padding: 0 8px 8px;
+}
+.preview-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #F3F4F6;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+.preview-item img {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+.preview-item span {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.remove-attachment-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 18px;
+    font-weight: bold;
+    padding: 0 4px;
+}
