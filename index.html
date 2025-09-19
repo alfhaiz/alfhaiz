@@ -12,7 +12,7 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- SIDEBAR -->
+        <!-- SIDEBAR (Tidak ada perubahan) -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="logo">ALFHAIZ</div>
@@ -27,15 +27,11 @@
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4V7zm-1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path></svg>
                     <span>New Chat</span>
                 </a>
-                
                 <p class="nav-section-title">HISTORY</p>
                 <div id="history-container"></div>
             </nav>
             <div class="sidebar-footer">
-                <div class="theme-switcher">
-                    <button class="theme-btn active">Light</button>
-                    <button class="theme-btn">Dark</button>
-                </div>
+                <div class="theme-switcher"><button class="theme-btn active">Light</button><button class="theme-btn">Dark</button></div>
                 <a href="#" class="nav-item auth-button">
                     <svg class="nav-icon" viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 00-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 002 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"></path></svg>
                     <span>Sign Out</span>
@@ -64,13 +60,28 @@
                 </div>
             </div>
 
+            <!-- DIUBAH TOTAL: STRUKTUR INPUT AREA BARU -->
             <footer class="input-area">
                 <div class="attachment-preview" id="attachment-preview"></div>
                 <div class="input-wrapper">
-                    <button class="attach-btn" id="attach-btn">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5a2.5 2.5 0 015 0v10.5c0 .83-.67 1.5-1.5 1.5s-1.5-.67-1.5-1.5V6H10v9.5a2.5 2.5 0 005 0V5c-2.21 0-4 1.79-4 4v11.5a5.002 5.002 0 0010 0V6h-1.5z"></path></svg>
-                    </button>
-                    <textarea id="chat-input" placeholder="Type your goal here" rows="1"></textarea>
+                    <div class="action-menu-container" id="action-menu-container">
+                        <div class="action-popup" id="action-popup">
+                            <button class="popup-option" id="attach-image-btn" title="Image">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18zM17 11l-2.5-3.15L11 12.51 8.5 9.5 5 14h14v-3z"></path></svg>
+                            </button>
+                            <button class="popup-option" id="attach-file-btn" title="File">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"></path></svg>
+                            </button>
+                             <button class="popup-option" id="attach-camera-btn" title="Camera">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm-2 4h4c1.1 0 2-.9 2-2v-1.09c.32-.11.63-.25.91-.42l1.5 1.5c.29.29.77.29 1.06 0l1.42-1.42c.29-.29.29-.77 0-1.06l-1.5-1.5c.17-.28.31-.59.42-.91H20c1.1 0 2-.9 2-2v-4c0-1.1-.9-2-2-2h-1.09c-.11-.32-.25-.63-.42-.91l1.5-1.5c.29-.29.29-.77 0-1.06L18.49.51c-.29-.29-.77-.29-1.06 0l-1.5 1.5c-.28-.17-.59-.31-.91-.42V1c0-.55-.45-1-1-1h-4c-.55 0-1 .45-1 1v1.09c-.32.11-.63.25-.91.42l-1.5-1.5c-.29-.29-.77-.29-1.06 0L.51 2.51c-.29.29-.29.77 0 1.06l1.5 1.5c-.17.28-.31.59-.42.91H1c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1h1.09c.11.32.25.63.42.91l-1.5 1.5c-.29.29-.29.77 0 1.06l1.42 1.42c.29.29.77.29 1.06 0l1.5-1.5c.28.17.59.31.91.42V19c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1.09c.32-.11.63-.25.91-.42l1.5 1.5c.29.29.77.29 1.06 0l1.42-1.42c.29-.29.29-.77 0-1.06l-1.5-1.5c.17-.28.31-.59.42-.91H19c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1h-1.09c-.11-.32-.25-.63-.42-.91l1.5-1.5c.29-.29.29-.77 0-1.06L18.49.51z"></path></svg>
+                            </button>
+                        </div>
+                        <button class="action-toggle-btn" id="action-toggle-btn">
+                            <svg class="icon-plus" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
+                            <svg class="icon-close" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+                        </button>
+                    </div>
+                    <textarea id="chat-input" placeholder="Tulis pesan..." rows="1"></textarea>
                     <button class="send-btn" id="send-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"></path></svg>
                     </button>
@@ -80,7 +91,9 @@
         
         <div class="sidebar-overlay" id="sidebar-overlay"></div>
     </div>
-    <input type="file" id="file-input" style="display: none;" accept="image/*" />
+    <!-- DITAMBAHKAN: Input file terpisah -->
+    <input type="file" id="image-file-input" style="display: none;" accept="image/*" />
+    <input type="file" id="other-file-input" style="display: none;" />
     <script src="script.js"></script>
 </body>
 </html>

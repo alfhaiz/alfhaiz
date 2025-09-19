@@ -1,3 +1,4 @@
+
 :root {
     --bg-main: #FFFFFF;
     --bg-sidebar: #F9FAFB;
@@ -70,53 +71,35 @@ body { font-family: var(--font-family); background-color: var(--bg-sidebar); col
 .message pre { background-color: #F3F4F6; padding: 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
 .message code { font-family: 'Courier New', Courier, monospace; background-color: #e5e7eb; padding: 2px 4px; border-radius: 4px; }
 .message pre code { background-color: transparent; padding: 0; }
-.message img { max-width: 100%; border-radius: 8px; margin-top: 8px; } /* Gaya untuk gambar di dalam pesan */
+.message img { max-width: 100%; border-radius: 8px; margin-top: 8px; }
 
 /* --- INPUT AREA --- */
 .input-area { padding: 8px 16px 16px; background-color: var(--bg-main); flex-shrink: 0; }
 .input-wrapper { display: flex; align-items: flex-end; gap: 8px; position: relative; border-radius: 24px; background: var(--bg-main); padding: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
 .input-wrapper::before { content: ''; position: absolute; inset: -1px; border-radius: 25px; background: var(--gradient); animation: gradient-flow 5s linear infinite; z-index: -1; }
 textarea { flex-grow: 1; padding: 8px; border: none; outline: none; resize: none; background: transparent; font-family: var(--font-family); font-size: 16px; line-height: 1.5; max-height: 120px; }
-.send-btn, .attach-btn { display: flex; align-items: center; justify-content: center; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: background-color 0.2s ease; flex-shrink: 0; }
-.send-btn { background-color: var(--text-primary); color: white; }
+.send-btn { display: flex; align-items: center; justify-content: center; border: none; background-color: var(--text-primary); color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: background-color 0.2s ease; flex-shrink: 0; }
 .send-btn:hover { background-color: #333; }
 .send-btn svg { width: 20px; height: 20px; transform: rotate(-45deg); }
-.attach-btn { background-color: transparent; color: var(--text-secondary); }
-.attach-btn:hover { background-color: #F3F4F6; }
-.attach-btn svg { width: 22px; height: 22px; }
 
-/* DITAMBAHKAN: Gaya untuk Pratinjau File */
-.attachment-preview {
-    padding: 0 8px 8px;
-}
-.preview-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background-color: #F3F4F6;
-    padding: 8px;
-    border-radius: 8px;
-    font-size: 13px;
-    color: var(--text-secondary);
-}
-.preview-item img {
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    object-fit: cover;
-}
-.preview-item span {
-    flex-grow: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.remove-attachment-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-secondary);
-    font-size: 18px;
-    font-weight: bold;
-    padding: 0 4px;
-}
+/* --- TOMBOL AKSI & POPUP BARU --- */
+.action-menu-container { position: relative; flex-shrink: 0; }
+.action-toggle-btn { display: flex; align-items: center; justify-content: center; border: none; background-color: transparent; color: var(--text-secondary); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: background-color 0.2s ease, transform 0.3s ease; }
+.action-toggle-btn:hover { background-color: #F3F4F6; }
+.action-toggle-btn svg { width: 24px; height: 24px; transition: opacity 0.3s ease, transform 0.3s ease; position: absolute; }
+.icon-close { opacity: 0; transform: rotate(-45deg); }
+.action-menu-container.open .action-toggle-btn { transform: rotate(45deg); background-color: #F3F4F6; }
+.action-menu-container.open .icon-plus { opacity: 0; }
+.action-menu-container.open .icon-close { opacity: 1; }
+.action-popup { position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; background-color: var(--bg-main); padding: 8px; border-radius: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 1px solid var(--border-color); opacity: 0; visibility: hidden; transform: translateX(-50%) translateY(10px); transition: all 0.2s ease; }
+.action-menu-container.open .action-popup { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+.popup-option { display: flex; align-items: center; justify-content: center; background-color: #F3F4F6; color: var(--text-secondary); border-radius: 50%; width: 40px; height: 40px; border: none; cursor: pointer; transition: all 0.2s ease; }
+.popup-option:hover { background-color: #e5e7eb; color: var(--text-primary); }
+.popup-option svg { width: 20px; height: 20px; }
+
+/* --- PRATINJAU FILE --- */
+.attachment-preview { padding: 0 8px 8px; }
+.preview-item { display: inline-flex; align-items: center; gap: 8px; background-color: #F3F4F6; padding: 6px 12px; border-radius: 16px; font-size: 13px; color: var(--text-secondary); }
+.preview-item img { width: 24px; height: 24px; border-radius: 4px; object-fit: cover; }
+.preview-item span { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.remove-attachment-btn { background: none; border: none; cursor: pointer; color: var(--text-secondary); font-weight: bold; padding: 0 0 0 8px; font-size: 18px; }
