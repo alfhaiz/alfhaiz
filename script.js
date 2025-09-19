@@ -7,13 +7,42 @@ document.addEventListener("DOMContentLoaded", () => {
     const chatContainer = document.getElementById("chat-container");
     const welcomeScreen = document.getElementById("welcome-screen");
     const chatInput = document.getElementById("chat-input");
-    const sendBtn = document.getElementById("send-btn"); // ID yang benar sudah dipanggil
+    const sendBtn = document.getElementById("send-btn");
     const historyContainer = document.getElementById("history-container");
-    
+    const optionsBtn = document.getElementById("options-btn");
+    const optionsMenu = document.getElementById("options-menu");
+    const exportChatBtn = document.getElementById("export-chat-btn");
+    const deleteChatBtn = document.getElementById("delete-chat-btn");
+
+    let isNewChat = true;
+
     // --- Sidebar Toggle ---
     const toggleSidebar = () => body.classList.toggle("sidebar-open");
     menuToggleBtn.addEventListener("click", toggleSidebar);
     sidebarOverlay.addEventListener("click", toggleSidebar);
+
+    // --- Opsi Menu (Titik Tiga) ---
+    optionsBtn.addEventListener("click", (e) => {
+        e.stopPropagation(); // Mencegah event bubbling ke window
+        optionsMenu.classList.toggle("active");
+    });
+    // Menutup menu jika klik di luar
+    window.addEventListener("click", () => {
+        if (optionsMenu.classList.contains("active")) {
+            optionsMenu.classList.remove("active");
+        }
+    });
+
+    // --- Placeholder Fungsionalitas Opsi ---
+    exportChatBtn.addEventListener("click", () => alert("Fungsi 'Export Chat' akan segera hadir!"));
+    deleteChatBtn.addEventListener("click", () => {
+        if (confirm("Apakah Anda yakin ingin menghapus percakapan ini?")) {
+            newChatBtn.click(); // Cara mudah untuk membersihkan chat
+            // Logika untuk menghapus dari history akan ditambahkan di sini
+            alert("Chat dihapus.");
+        }
+    });
+
 
     // --- Fungsi "New Chat" ---
     newChatBtn.addEventListener("click", (e) => {
@@ -23,6 +52,9 @@ document.addEventListener("DOMContentLoaded", () => {
             chatContainer.appendChild(welcomeScreen);
             welcomeScreen.style.display = 'block';
         }
+        isNewChat = true; // Set flag bahwa ini adalah chat baru
+        // Menghapus status aktif dari semua history item
+        document.querySelectorAll('#history-container .nav-item').forEach(item => item.classList.remove('active'));
         if(body.classList.contains("sidebar-open")) toggleSidebar();
     });
 
@@ -39,7 +71,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (welcomeScreen) welcomeScreen.style.display = 'none';
         
-        createHistoryItem(prompt);
+        // Hanya buat history item jika ini adalah pesan pertama dari chat baru
+        if (isNewChat) {
+            createHistoryItem(prompt);
+            isNewChat = false; // Setelah pesan pertama, ini bukan lagi chat baru
+        }
+        
         appendMessage('user', prompt);
         chatInput.value = '';
         chatInput.style.height = 'auto';
@@ -71,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- Fungsi untuk Menampilkan Pesan (Teks Murni) ---
+    // --- Fungsi untuk Menampilkan Pesan ---
     function appendMessage(sender, text) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}`;
@@ -92,11 +129,14 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // --- Fungsi untuk Membuat Item History ---
     function createHistoryItem(prompt) {
+        // Hapus status aktif dari item sebelumnya
+        document.querySelectorAll('#history-container .nav-item').forEach(item => item.classList.remove('active'));
+        
         const historyItem = document.createElement('a');
         historyItem.href = '#';
-        historyItem.className = 'nav-item';
+        historyItem.className = 'nav-item active'; // Langsung set sebagai aktif
         historyItem.innerHTML = `
-            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 11.01L3 11v2h18zM3 16h12v2H3zM21 6H3v2.01L21 8z"></path></svg>
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.01L3 11v2h18zM3 16h12v2H3zM21 6H3v2.01L21 8z"></path></svg>
             <span>${prompt.substring(0, 20) + (prompt.length > 20 ? '...' : '')}</span>
         `;
         historyContainer.prepend(historyItem);
