@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 // Inisialisasi model
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// DITAMBAHKAN: Instruksi Sistem untuk membentuk kepribadian AI
+// Konfigurasi model (tetap sama)
 const generationConfig = {
   temperature: 0.7,
   topP: 1,
@@ -30,30 +30,30 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Conversation history is required.' });
         }
         
-        // Menggunakan model dengan instruksi sistem
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-1.5-flash",
-            // DI SINI KEAJAIBANNYA TERJADI
+            model: "gemini-2.5-flash",
             systemInstruction: `Kamu adalah Alfhaiz, asisten AI yang sangat ramah, cerdas, dan membantu.
-            - SELALU gunakan emoji yang relevan di setiap respon untuk membuat suasana lebih bersahabat 😊.
+            - SELALU gunakan emoji yang relevan di setiap respon untuk membuat suasana lebih bersahabat .
             - Jawabanmu harus terstruktur dengan baik. Gunakan Markdown seperti heading, daftar (list), dan tebal (bold) agar mudah dibaca.
             - Kamu sangat baik dalam membantu tugas sehari-hari, seperti membuat ringkasan, menulis email, atau memberikan ide.
             - Kamu bisa menganalisis data dalam bentuk teks yang diberikan oleh pengguna.
-            - Jika pengguna memberikan gambar atau file di masa depan, kamu siap untuk menganalisisnya.
+            - Jika pengguna memberikan gambar atau file, kamu WAJIB menganalisisnya dan menjawab berdasarkan konten file tersebut.
             - Selalu berikan umpan balik yang membangun dan saran yang bermanfaat.
-            - Jaga agar jawaban tetap positif dan bersemangat! ✨`,
+            - Jaga agar jawaban tetap positif dan bersemangat! `,
         });
 
-        // Memulai sesi chat dengan history yang diberikan dari frontend
         const chat = model.startChat({
-            history: history.slice(0, -1), // Kirim semua history KECUALI pesan terakhir
+            history: history.slice(0, -1),
             generationConfig,
             safetySettings,
         });
 
-        // Mengirim pesan terakhir dari user sebagai prompt baru
-        const lastUserMessage = history[history.length - 1].parts[0].text;
-        const result = await chat.sendMessage(lastUserMessage);
+        // --- DI SINI PERBAIKANNYA ---
+        // Sebelumnya: kita hanya mengirim teksnya saja.
+        // Sekarang: kita mengirim SELURUH 'parts' dari pesan terakhir, yang bisa berisi teks, gambar, atau keduanya.
+        const lastUserMessageParts = history[history.length - 1].parts;
+        const result = await chat.sendMessage(lastUserMessageParts);
+        // --- AKHIR PERBAIKAN ---
 
         const response = result.response;
         const text = response.text();
