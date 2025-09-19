@@ -1,48 +1,25 @@
-
 :root {
     --bg-main: #FFFFFF;
     --bg-sidebar: #F9FAFB;
-    --bg-input: #FFFFFF;
     --text-primary: #111827;
     --text-secondary: #6B7280;
     --border-color: #F3F4F6;
-    --accent-primary: #4F46E5; /* Warna bubble user */
+    --accent-primary: #4F46E5;
     --font-family: 'Inter', sans-serif;
     --gradient: linear-gradient(90deg, #4F46E5, #9333EA, #EC4899);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html, body {
-    height: 100%; /* Penting untuk layout stabil */
-    overflow: hidden;
-}
-
-body {
-    font-family: var(--font-family);
-    background-color: var(--bg-sidebar);
-    color: var(--text-primary);
-    -webkit-font-smoothing: antialiased;
-}
-
-/* --- FIX UTAMA UNTUK TAMPILAN MOBILE --- */
-.app-container, .main-content {
-    /* Menggunakan dvh (dynamic viewport height) untuk mengatasi bar browser mobile */
-    height: 100dvh; 
-    height: -webkit-fill-available; /* Fallback untuk iOS Safari */
-}
+html, body { height: 100%; overflow: hidden; }
+body { font-family: var(--font-family); background-color: var(--bg-sidebar); color: var(--text-primary); -webkit-font-smoothing: antialiased; }
+.app-container, .main-content { height: 100dvh; height: -webkit-fill-available; }
 .app-container { display: flex; width: 100vw; }
 
-
-/* --- SIDEBAR (Tidak ada perubahan signifikan) --- */
-.sidebar {
-    background-color: var(--bg-sidebar);
-    width: 260px; padding: 16px; display: flex; flex-direction: column;
-    position: fixed; top: 0; left: 0; height: 100%;
-    transform: translateX(-100%); transition: transform 0.3s ease; z-index: 1000;
-    border-right: 1px solid var(--border-color);
-}
+/* --- SIDEBAR (Tidak ada perubahan) --- */
+.sidebar { background-color: var(--bg-sidebar); width: 260px; padding: 16px; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); transition: transform 0.3s ease; z-index: 1000; border-right: 1px solid var(--border-color); }
 .sidebar-open .sidebar { transform: translateX(0); }
+/* ... (sisa gaya sidebar tetap sama) ... */
 .sidebar-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); opacity: 0; visibility: hidden; transition: opacity 0.3s ease; z-index: 999; }
 .sidebar-open .sidebar-overlay { opacity: 1; visibility: visible; }
 .sidebar-header .logo { font-size: 22px; font-weight: 700; padding: 12px 8px; }
@@ -58,69 +35,91 @@ body {
 .theme-btn.active { background-color: var(--bg-main); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 .auth-button { color: var(--text-secondary); }
 
+
 /* --- KONTEN UTAMA --- */
 .main-content { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-main); }
 .main-header { display: flex; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
 .menu-toggle { background: none; border: none; cursor: pointer; padding: 8px; }
 .menu-toggle svg { width: 24px; height: 24px; fill: var(--text-primary); }
-.header-title { font-weight: 600; font-size: 16px; margin-left: 16px; }
+.header-title { font-weight: 600; font-size: 18px; margin-left: 16px; letter-spacing: 0.5px; }
 
 /* --- AREA CHAT --- */
 .chat-container { flex-grow: 1; overflow-y: auto; padding: 24px 16px; display: flex; flex-direction: column; }
-.welcome-screen { text-align: center; margin: auto; } /* Posisi di tengah */
-.welcome-screen h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
-.welcome-screen p { color: var(--text-secondary); font-size: 15px; }
+.welcome-screen { text-align: center; margin: auto; }
+.welcome-screen h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.welcome-screen p { color: var(--text-secondary); font-size: 16px; }
 
-/* --- DESAIN PESAN BARU (Kanan-Kiri, Tanpa Avatar) --- */
+/* --- ANIMASI GRADASI BARU --- */
+@keyframes gradient-flow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+.animated-gradient-text {
+    background: var(--gradient);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-flow 5s linear infinite;
+}
+
+/* --- DESAIN PESAN BARU (Teks Murni, Tanpa Bubble) --- */
 .message {
-    padding: 10px 16px;
-    border-radius: 18px;
+    padding: 4px 0; /* Sedikit padding vertikal */
     margin-bottom: 12px;
-    max-width: 80%; /* Pesan tidak terlalu lebar */
+    max-width: 85%;
     animation: fadeIn 0.5s ease;
     line-height: 1.6;
     white-space: pre-wrap;
     word-wrap: break-word;
 }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-/* Pesan AI di KIRI */
-.message.ai {
-    align-self: flex-start;
-    background-color: var(--bg-sidebar);
-    color: var(--text-primary);
-    border-bottom-left-radius: 4px;
-}
-
-/* Pesan User di KANAN */
-.message.user {
-    align-self: flex-end;
-    background-color: var(--accent-primary);
-    color: white;
-    border-bottom-right-radius: 4px;
-}
-
-/* Loading Spinner di KIRI */
-.loading-indicator {
-    align-self: flex-start;
-    display: flex;
-    padding: 10px;
-}
+.message.ai { align-self: flex-start; }
+.message.user { align-self: flex-end; text-align: right; } /* Teks rata kanan untuk user */
+.loading-indicator { align-self: flex-start; display: flex; padding: 10px 0; }
 .spinner { width: 24px; height: 24px; border: 3px solid #e0e0e0; border-top-color: var(--text-primary); border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* --- INPUT AREA --- */
+/* --- INPUT AREA DIPERBARUI --- */
 .input-area { padding: 8px 16px 16px; background-color: var(--bg-main); flex-shrink: 0; }
-.input-wrapper { position: relative; border-radius: 12px; background: var(--bg-input); padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-.input-wrapper::before { content: ''; position: absolute; inset: -1px; border-radius: 13px; background: var(--gradient); z-index: -1; }
-textarea { width: 100%; padding: 12px 16px; border: none; outline: none; resize: none; background: transparent; font-family: var(--font-family); font-size: 16px; line-height: 1.5; max-height: 120px; margin-bottom: 8px; }
-.generate-btn { display: flex; align-items: center; justify-content: flex-end; gap: 8px; float: right; padding: 8px 12px; border: none; background-color: var(--text-primary); color: white; border-radius: 8px; font-weight: 500; font-size: 14px; cursor: pointer; transition: background-color 0.2s ease; }
-.generate-btn:hover { background-color: #333; }
-.generate-btn svg { width: 16px; height: 16px; fill: currentColor; }
-
-/* Media Query untuk Desktop (akan kita aktifkan nanti) */
-/*
-@media (min-width: 768px) {
-    ...
+.input-wrapper {
+    display: flex; /* Menggunakan flexbox untuk alignment */
+    align-items: flex-end; /* Tombol dan textarea align di bawah */
+    gap: 8px;
+    position: relative;
+    border-radius: 24px; /* DIUBAH: Ujung lebih bulat */
+    background: var(--bg-main);
+    padding: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
-*/
+.input-wrapper::before {
+    content: '';
+    position: absolute; inset: -1px;
+    border-radius: 25px; /* DIUBAH: Sesuai border-radius parent +1px */
+    background: var(--gradient);
+    animation: gradient-flow 5s linear infinite; /* DIUBAH: Menambahkan animasi border */
+    z-index: -1;
+}
+textarea {
+    flex-grow: 1; /* Mengisi ruang yang tersedia */
+    padding: 8px;
+    border: none; outline: none; resize: none;
+    background: transparent;
+    font-family: var(--font-family); font-size: 16px;
+    line-height: 1.5;
+    max-height: 120px;
+}
+/* TOMBOL KIRIM BARU */
+.send-btn {
+    display: flex; align-items: center; justify-content: center;
+    border: none;
+    background-color: var(--text-primary);
+    color: white;
+    width: 36px; height: 36px; /* Ukuran tombol */
+    border-radius: 50%; /* Bulat sempurna */
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    flex-shrink: 0; /* Mencegah tombol mengecil */
+}
+.send-btn:hover { background-color: #333; }
+.send-btn svg { width: 20px; height: 20px; transform: rotate(-45deg); } /* Ikon dirotasi agar mengarah ke atas */

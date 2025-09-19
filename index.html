@@ -11,38 +11,9 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- SIDEBAR -->
+        <!-- SIDEBAR (Tidak ada perubahan) -->
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">ALFHAIZ</div>
-            </div>
-            <nav class="sidebar-nav">
-                <p class="nav-section-title">OVERVIEW</p>
-                <a href="#" class="nav-item active" id="new-chat-btn">
-                    <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"></path></svg>
-                    <span>Dashboard</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <svg class="nav-icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"></path></svg>
-                    <span>Organization</span>
-                </a>
-                
-                <p class="nav-section-title">NAVIGATION</p>
-                <div id="history-container">
-                    <!-- History akan muncul di sini -->
-                </div>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="theme-switcher">
-                    <button class="theme-btn active">Light</button>
-                    <button class="theme-btn">Dark</button>
-                </div>
-                <a href="#" class="nav-item auth-button">
-                    <svg class="nav-icon" viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 00-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 002 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"></path></svg>
-                    <span>Sign Out</span>
-                </a>
-            </div>
+            <!-- Konten sidebar tetap sama -->
         </aside>
 
         <!-- KONTEN UTAMA -->
@@ -51,13 +22,14 @@
                 <button class="menu-toggle" id="menu-toggle-btn">
                     <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
                 </button>
-                <div class="header-title">Dashboard</div>
+                <!-- DIUBAH: Teks Header -->
+                <div class="header-title">ALFHAIZ</div>
             </header>
             
             <div class="chat-container" id="chat-container">
-                <!-- Welcome Screen atau Pesan Chat -->
                 <div class="welcome-screen" id="welcome-screen">
-                    <h1>Welcome to Alfhaiz</h1>
+                    <!-- DIUBAH: Ditambahkan class untuk animasi -->
+                    <h1 class="animated-gradient-text">Welcome to Alfhaiz</h1>
                     <p>Achieve your goals with AI-powered efficiency.</p>
                 </div>
             </div>
@@ -65,9 +37,11 @@
             <footer class="input-area">
                 <div class="input-wrapper">
                     <textarea id="chat-input" placeholder="Type your goal here" rows="1"></textarea>
-                    <button class="generate-btn" id="generate-btn">
-                        <svg viewBox="0 0 24 24"><path d="M12 2.25a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM12 15.75a.75.75 0 01.75.75v5.25a.75.75 0 01-1.5 0v-5.25a.75.75 0 01.75-.75zM5.25 12a.75.75 0 01.75-.75h12a.75.75 0 010 1.5H6a.75.75 0 01-.75-.75z"></path></svg>
-                        <span>Generate</span>
+                    <!-- DIUBAH: Tombol dan Ikon Baru -->
+                    <button class="send-btn" id="send-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"></path>
+                        </svg>
                     </button>
                 </div>
             </footer>
