@@ -37,9 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (welcomeScreen) welcomeScreen.style.display = 'none';
         
-        // Buat history item di sidebar (logika sederhana)
         createHistoryItem(prompt);
-
         appendMessage('user', prompt);
         chatInput.value = '';
         chatInput.style.height = 'auto';
@@ -71,30 +69,24 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- Fungsi untuk Menampilkan Pesan ---
+    // --- Fungsi untuk Menampilkan Pesan (TANPA AVATAR) ---
     function appendMessage(sender, text) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}`;
-        const avatarInitial = sender === 'user' ? 'U' : 'A';
-        messageDiv.innerHTML = `
-            <div class="avatar">${avatarInitial}</div>
-            <div class="message-content"><p>${text.replace(/\n/g, '<br>')}</p></div>`; // Ganti newline dengan <br>
+        // Langsung masukkan teks, tanpa div avatar atau content
+        messageDiv.innerHTML = text.replace(/\n/g, '<br>');
         chatContainer.appendChild(messageDiv);
         scrollToBottom();
     }
 
-    // --- Fungsi untuk Menampilkan Loading Spinner ---
+    // --- Fungsi untuk Menampilkan Loading Spinner (TANPA AVATAR) ---
     function appendLoadingIndicator() {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'message ai';
-        messageDiv.innerHTML = `
-            <div class="avatar">A</div>
-            <div class="loading-indicator">
-                <div class="spinner"></div>
-            </div>`;
-        chatContainer.appendChild(messageDiv);
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'loading-indicator';
+        loadingDiv.innerHTML = `<div class="spinner"></div>`;
+        chatContainer.appendChild(loadingDiv);
         scrollToBottom();
-        return messageDiv;
+        return loadingDiv;
     }
     
     // --- Fungsi untuk Membuat Item History ---
