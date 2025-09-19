@@ -1,31 +1,28 @@
-// File: api/generate.js
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export default async function handler(req, res) {
-  // Hanya izinkan metode POST
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
-    return res.status(405).end(`Method ${req.method} Not Allowed`);
-  }
-
-  try {
-    const { prompt } = req.body;
-
-    // Validasi input
-    if (!prompt || typeof prompt !== 'string') {
-      return res.status(400).json({ error: 'Input "prompt" dibutuhkan dan harus berupa string.' });
+    if (req.method !== 'POST') {
+        res.setHeader('Allow', ['POST']);
+        return res.status(405).end(`Method ${req.method} Not Allowed`);
     }
 
-    // =======================================================
-    // == DI SINI KITA AKAN MENAMBAHKAN KONEKSI KE GEMINI API ==
-    // =======================================================
+    try {
+        const { prompt } = req.body;
+        if (!prompt) {
+            return res.status(400).json({ error: 'Prompt is required.' });
+        }
+        
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
 
-    // Untuk sekarang, kita kembalikan respons palsu untuk pengujian
-    const dummyResponse = `Ini adalah respons AI untuk prompt: "${prompt}"`;
+        return res.status(200).json({ data: text });
 
-    return res.status(200).json({ data: dummyResponse });
-
-  } catch (error) {
-    console.error('Terjadi kesalahan di server:', error);
-    return res.status(500).json({ error: 'Terjadi kesalahan internal pada server.' });
-  }
+    } catch (error) {
+        console.error('Error calling Gemini API:', error);
+        return res.status(500).json({ error: 'Failed to get response from AI.' });
+    }
 }
