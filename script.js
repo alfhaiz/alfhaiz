@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const chatContainer = document.getElementById("chat-container");
     const welcomeScreen = document.getElementById("welcome-screen");
     const chatInput = document.getElementById("chat-input");
-    const sendBtn = document.getElementById("send-btn"); // Disesuaikan dengan ID tombol baru
+    const generateBtn = document.getElementById("generate-btn");
     const historyContainer = document.getElementById("history-container");
     
     // --- Sidebar Toggle ---
@@ -19,10 +19,8 @@ document.addEventListener("DOMContentLoaded", () => {
     newChatBtn.addEventListener("click", (e) => {
         e.preventDefault();
         chatContainer.innerHTML = '';
-        if (welcomeScreen) {
-            chatContainer.appendChild(welcomeScreen);
-            welcomeScreen.style.display = 'block';
-        }
+        chatContainer.appendChild(welcomeScreen);
+        welcomeScreen.style.display = 'block';
         if(body.classList.contains("sidebar-open")) toggleSidebar();
     });
 
@@ -63,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // --- Event Listener untuk Kirim ---
-    sendBtn.addEventListener("click", handleSendMessage);
+    generateBtn.addEventListener("click", handleSendMessage);
     chatInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -71,17 +69,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- Fungsi untuk Menampilkan Pesan (Teks Murni) ---
+    // --- Fungsi untuk Menampilkan Pesan (TANPA AVATAR) ---
     function appendMessage(sender, text) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}`;
-        // Mengubah newline menjadi tag <br> agar format paragraf tetap terjaga
+        // Langsung masukkan teks, tanpa div avatar atau content
         messageDiv.innerHTML = text.replace(/\n/g, '<br>');
         chatContainer.appendChild(messageDiv);
         scrollToBottom();
     }
 
-    // --- Fungsi untuk Menampilkan Loading Spinner ---
+    // --- Fungsi untuk Menampilkan Loading Spinner (TANPA AVATAR) ---
     function appendLoadingIndicator() {
         const loadingDiv = document.createElement('div');
         loadingDiv.className = 'loading-indicator';
