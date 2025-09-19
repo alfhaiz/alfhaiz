@@ -1,53 +1,95 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const morphingPlaceholder = document.getElementById("morphing-placeholder");
+    // --- Elemen DOM ---
+    const menuToggleBtn = document.getElementById("menu-toggle-btn");
+    const sidebarOverlay = document.getElementById("sidebar-overlay");
+    const body = document.body;
+    const chatInput = document.getElementById("chat-input");
+    const sendBtn = document.getElementById("send-btn");
+    const messagesContainer = document.getElementById("messages-container");
+    const welcomeScreen = document.getElementById("welcome-screen");
 
-    const phrases = [
-        "Animasi Morph Teks",
-        "Kirim pesan...",
-        "Tanya tentang apa saja",
-        "Buatkan sebuah cerita",
-        "Bagaimana saya bisa membantu?",
-    ];
+    // --- Sidebar Toggle untuk Mobile ---
+    const toggleSidebar = () => body.classList.toggle("sidebar-open");
+    menuToggleBtn.addEventListener("click", toggleSidebar);
+    sidebarOverlay.addEventListener("click", toggleSidebar);
 
-    let phraseIndex = 0;
-    let charIndex = 0;
-    let isDeleting = false;
-    const typingSpeed = 120;
-    const deletingSpeed = 60;
-    const delayBetweenPhrases = 1500;
+    // --- Auto-resize Textarea ---
+    chatInput.addEventListener('input', () => {
+        chatInput.style.height = 'auto';
+        chatInput.style.height = `${chatInput.scrollHeight}px`;
+    });
 
-    function animateText() {
-        const currentPhrase = phrases[phraseIndex];
-        let newText;
+    // --- Fungsi Pengiriman Pesan ---
+    const handleSendMessage = async () => {
+        const prompt = chatInput.value.trim();
+        if (!prompt) return;
 
-        if (isDeleting) {
-            // Proses menghapus
-            newText = currentPhrase.substring(0, charIndex - 1);
-            charIndex--;
-        } else {
-            // Proses mengetik
-            newText = currentPhrase.substring(0, charIndex + 1);
-            charIndex++;
+        if (welcomeScreen) welcomeScreen.style.display = 'none';
+        appendMessage('user', prompt);
+        chatInput.value = '';
+        chatInput.style.height = 'auto';
+        const loadingIndicator = appendLoadingIndicator();
+
+        try {
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt }),
+            });
+            if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
+            const result = await response.json();
+            loadingIndicator.remove();
+            appendMessage('ai', result.data);
+        } catch (error) {
+            console.error("Error fetching AI response:", error);
+            loadingIndicator.remove();
+            appendMessage('ai', 'Maaf, terjadi kesalahan. Coba lagi nanti.');
         }
+    };
 
-        morphingPlaceholder.textContent = newText;
-
-        // Logika untuk mengubah state
-        if (!isDeleting && charIndex === currentPhrase.length) {
-            // Selesai mengetik, tunggu, lalu mulai hapus
-            isDeleting = true;
-            setTimeout(animateText, delayBetweenPhrases);
-        } else if (isDeleting && charIndex === 0) {
-            // Selesai menghapus, ganti ke frasa berikutnya
-            isDeleting = false;
-            phraseIndex = (phraseIndex + 1) % phrases.length;
-            setTimeout(animateText, typingSpeed);
-        } else {
-            // Lanjutkan mengetik atau menghapus
-            setTimeout(animateText, isDeleting ? deletingSpeed : typingSpeed);
+    // --- Event Listener untuk Kirim ---
+    sendBtn.addEventListener("click", handleSendMessage);
+    chatInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
         }
+    });
+
+    // --- Fungsi Bantuan untuk Menampilkan Pesan ---
+    function appendMessage(sender, text) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}`;
+        const avatarInitial = sender === 'user' ? 'U' : 'A';
+        messageDiv.innerHTML = `
+            <div class="message-inner">
+                <div class="avatar">${avatarInitial}</div>
+                <div class="message-content">
+                    <p>${text}</p>
+                </div>
+            </div>`;
+        messagesContainer.appendChild(messageDiv);
+        scrollToBottom();
     }
 
-    // Mulai animasi setelah jeda awal
-    setTimeout(animateText, 1000);
+    // --- Fungsi Bantuan untuk Menampilkan Loading ---
+    function appendLoadingIndicator() {
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'message ai';
+        loadingDiv.innerHTML = `
+            <div class="message-inner">
+                 <div class="avatar">A</div>
+                 <div class="message-content loading-indicator">
+                     <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                 </div>
+            </div>`;
+        messagesContainer.appendChild(loadingDiv);
+        scrollToBottom();
+        return loadingDiv;
+    }
+
+    // --- Fungsi untuk Auto-scroll ---
+    function scrollToBottom() {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
 });

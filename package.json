@@ -1,0 +1,12 @@
+{
+  "name": "alfhaiz-ai",
+  "version": "1.0.0",
+  "description": "AI Chat Application",
+  "main": "index.html",
+  "scripts": {
+    "start": "echo \"No start script needed for static files, Vercel handles API routing.\" && exit 0"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.1.3"
+  }
+}

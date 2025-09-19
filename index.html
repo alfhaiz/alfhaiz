@@ -4,41 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alfhaiz AI</title>
-    <link rel="stylesheet" href="assets/style.css">
+    <!-- Path CSS diperbarui -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
-    <header class="main-header">
-        <div class="logo">ALFHAIZ</div>
-        <div class="menu-icon">
-            <span></span>
-            <span></span>
-        </div>
-    </header>
-
-    <main class="main-content">
-        <div class="center-logo-container">
-            <h1 class="center-logo">ALFHAIZ</h1>
-        </div>
-
-        <div class="chat-input-area">
-            <div class="chat-input-wrapper">
-                <button class="icon-button plus-button">+</button>
-                <div id="morphing-placeholder" class="placeholder-text"></div>
-                <button class="icon-button voice-button">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
-                </button>
-                <button class="icon-button send-button">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
-                </button>
+    <div class="app-container">
+        <!-- SIDEBAR (NAVIGASI) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">ALFHAIZ</div>
             </div>
-        </div>
-    </main>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active">New Chat</a>
+                <p class="nav-section-title">Conversations</p>
+                <a href="#" class="nav-item">Clipboard Issue Fix</a>
+                <a href="#" class="nav-item">Image Request Summary</a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" class="nav-item">Settings</a>
+                <a href="#" class="nav-item">Support</a>
+                <div class="user-profile">
+                    <img src="https://via.placeholder.com/40" alt="User Avatar" class="avatar">
+                    <div class="user-info">
+                        <span class="user-name">Alfhaiz</span>
+                        <span class="user-email">email@domain.com</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
 
-    <footer class="main-footer">
-        <p>2025 Alfhaiz | Inc.</p>
-    </footer>
+        <!-- KONTEN CHAT UTAMA -->
+        <main class="chat-area">
+            <header class="chat-header">
+                <button class="menu-toggle" id="menu-toggle-btn">
+                    <!-- Ikon SVG Menu disematkan langsung -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+                <span class="header-title">Alfhaiz AI</span>
+            </header>
+            
+            <div class="messages-container" id="messages-container">
+                <!-- Welcome Screen -->
+                <div class="welcome-screen" id="welcome-screen">
+                    <div class="logo-icon">A</div>
+                    <h2>How can I help today?</h2>
+                </div>
+                <!-- Pesan akan ditambahkan di sini oleh JavaScript -->
+            </div>
+
+            <footer class="chat-input-container">
+                <div class="input-wrapper">
+                    <textarea id="chat-input" placeholder="Ask anything..." rows="1"></textarea>
+                    <button class="send-btn" id="send-btn">
+                        <!-- Ikon SVG Send disematkan langsung -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
+                <p class="footer-note">Alfhaiz AI can make mistakes. Consider checking important information.</p>
+            </footer>
+        </main>
+        
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    </div>
 
     <script src="script.js"></script>
 </body>
-  </html>
+</html>
