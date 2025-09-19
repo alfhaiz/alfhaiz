@@ -4,16 +4,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const menuToggleBtn = document.getElementById("menu-toggle-btn");
     const sidebarOverlay = document.getElementById("sidebar-overlay");
     const newChatBtn = document.getElementById("new-chat-btn");
-    const messagesContainer = document.getElementById("messages-container");
+    const chatContainer = document.getElementById("chat-container");
     const welcomeScreen = document.getElementById("welcome-screen");
     const chatInput = document.getElementById("chat-input");
-    const sendBtn = document.getElementById("send-btn");
+    const generateBtn = document.getElementById("generate-btn");
     const historyContainer = document.getElementById("history-container");
-    const historySection = document.getElementById("history-section");
     
-    let isNewChat = true;
-
-    // --- Sidebar Toggle untuk Mobile ---
+    // --- Sidebar Toggle ---
     const toggleSidebar = () => body.classList.toggle("sidebar-open");
     menuToggleBtn.addEventListener("click", toggleSidebar);
     sidebarOverlay.addEventListener("click", toggleSidebar);
@@ -21,10 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Fungsi "New Chat" ---
     newChatBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        messagesContainer.innerHTML = ''; // Hapus semua pesan
-        messagesContainer.appendChild(welcomeScreen); // Tampilkan lagi welcome screen
+        chatContainer.innerHTML = '';
+        chatContainer.appendChild(welcomeScreen);
         welcomeScreen.style.display = 'block';
-        isNewChat = true;
         if(body.classList.contains("sidebar-open")) toggleSidebar();
     });
 
@@ -41,11 +37,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (welcomeScreen) welcomeScreen.style.display = 'none';
         
-        // Buat history item jika ini pesan pertama
-        if (isNewChat) {
-            createHistoryItem(prompt);
-            isNewChat = false;
-        }
+        // Buat history item di sidebar (logika sederhana)
+        createHistoryItem(prompt);
 
         appendMessage('user', prompt);
         chatInput.value = '';
@@ -61,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
             const result = await response.json();
             loadingIndicator.remove();
-            appendTypingMessage('ai', result.data); // Gunakan fungsi typing baru
+            appendMessage('ai', result.data);
         } catch (error) {
             console.error("Error fetching AI response:", error);
             loadingIndicator.remove();
@@ -70,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // --- Event Listener untuk Kirim ---
-    sendBtn.addEventListener("click", handleSendMessage);
+    generateBtn.addEventListener("click", handleSendMessage);
     chatInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -78,48 +71,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- Fungsi untuk Menampilkan Pesan Statis (User) ---
+    // --- Fungsi untuk Menampilkan Pesan ---
     function appendMessage(sender, text) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}`;
         const avatarInitial = sender === 'user' ? 'U' : 'A';
         messageDiv.innerHTML = `
             <div class="avatar">${avatarInitial}</div>
-            <div class="message-content"><p>${text}</p></div>`;
-        messagesContainer.appendChild(messageDiv);
+            <div class="message-content"><p>${text.replace(/\n/g, '<br>')}</p></div>`; // Ganti newline dengan <br>
+        chatContainer.appendChild(messageDiv);
         scrollToBottom();
     }
-    
-    // --- Fungsi BARU untuk Menampilkan Respons AI dengan Efek Typing ---
-    function appendTypingMessage(sender, text) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${sender}`;
-        const avatarInitial = 'A';
-        messageDiv.innerHTML = `
-            <div class="avatar">${avatarInitial}</div>
-            <div class="message-content"><p></p></div>`;
-        messagesContainer.appendChild(messageDiv);
-        
-        const p = messageDiv.querySelector('p');
-        const words = text.split(' ');
-        let i = 0;
 
-        function typeWord() {
-            if (i < words.length) {
-                const wordSpan = document.createElement('span');
-                wordSpan.textContent = words[i] + ' ';
-                // Style agar animasi terlihat
-                wordSpan.style.display = 'inline-block';
-                p.appendChild(wordSpan);
-                i++;
-                scrollToBottom();
-                setTimeout(typeWord, 100); // Jeda antar kata
-            }
-        }
-        typeWord();
-    }
-
-    // --- Fungsi BARU untuk Menampilkan Loading Spinner ---
+    // --- Fungsi untuk Menampilkan Loading Spinner ---
     function appendLoadingIndicator() {
         const messageDiv = document.createElement('div');
         messageDiv.className = 'message ai';
@@ -128,28 +92,25 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="loading-indicator">
                 <div class="spinner"></div>
             </div>`;
-        messagesContainer.appendChild(messageDiv);
+        chatContainer.appendChild(messageDiv);
         scrollToBottom();
         return messageDiv;
     }
-
-    // --- Fungsi BARU untuk Membuat Item History ---
+    
+    // --- Fungsi untuk Membuat Item History ---
     function createHistoryItem(prompt) {
-        if(historyContainer.children.length === 0) historySection.style.display = 'block';
-
         const historyItem = document.createElement('a');
         historyItem.href = '#';
         historyItem.className = 'nav-item';
-        historyItem.textContent = prompt.substring(0, 25) + (prompt.length > 25 ? '...' : '');
-        // Tambahkan di awal list
+        historyItem.innerHTML = `
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 11.01L3 11v2h18zM3 16h12v2H3zM21 6H3v2.01L21 8z"></path></svg>
+            <span>${prompt.substring(0, 20) + (prompt.length > 20 ? '...' : '')}</span>
+        `;
         historyContainer.prepend(historyItem);
     }
-
+    
     // --- Fungsi untuk Auto-scroll ---
     function scrollToBottom() {
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        chatContainer.scrollTop = chatContainer.scrollHeight;
     }
-
-    // Sembunyikan section history jika kosong
-    historySection.style.display = 'none';
 });
