@@ -13,71 +13,63 @@ document.addEventListener("DOMContentLoaded", () => {
     const optionsMenu = document.getElementById("options-menu");
     const exportChatBtn = document.getElementById("export-chat-btn");
     const deleteChatBtn = document.getElementById("delete-chat-btn");
+    const attachBtn = document.getElementById("attach-btn");
+    const fileInput = document.getElementById("file-input");
+    const attachmentPreview = document.getElementById("attachment-preview");
 
-    let isNewChat = true;
+    // --- Variabel State Aplikasi ---
+    let conversationHistory = [];
 
-    // --- Sidebar Toggle ---
+    // --- Sidebar & Menu ---
     const toggleSidebar = () => body.classList.toggle("sidebar-open");
     menuToggleBtn.addEventListener("click", toggleSidebar);
     sidebarOverlay.addEventListener("click", toggleSidebar);
-
-    // --- Opsi Menu (Titik Tiga) ---
-    optionsBtn.addEventListener("click", (e) => {
-        e.stopPropagation(); // Mencegah event bubbling ke window
-        optionsMenu.classList.toggle("active");
-    });
-    // Menutup menu jika klik di luar
-    window.addEventListener("click", () => {
-        if (optionsMenu.classList.contains("active")) {
-            optionsMenu.classList.remove("active");
-        }
-    });
-
-    // --- Placeholder Fungsionalitas Opsi ---
+    optionsBtn.addEventListener("click", (e) => { e.stopPropagation(); optionsMenu.classList.toggle("active"); });
+    window.addEventListener("click", () => optionsMenu.classList.remove("active"));
     exportChatBtn.addEventListener("click", () => alert("Fungsi 'Export Chat' akan segera hadir!"));
-    deleteChatBtn.addEventListener("click", () => {
-        if (confirm("Apakah Anda yakin ingin menghapus percakapan ini?")) {
-            newChatBtn.click(); // Cara mudah untuk membersihkan chat
-            // Logika untuk menghapus dari history akan ditambahkan di sini
-            alert("Chat dihapus.");
-        }
-    });
-
+    deleteChatBtn.addEventListener("click", () => { if (confirm("Hapus percakapan ini?")) { newChatBtn.click(); } });
 
     // --- Fungsi "New Chat" ---
     newChatBtn.addEventListener("click", (e) => {
         e.preventDefault();
         chatContainer.innerHTML = '';
         if (welcomeScreen) {
+            welcomeScreen.style.display = 'block'; // Ensure it's a block element
             chatContainer.appendChild(welcomeScreen);
-            welcomeScreen.style.display = 'block';
         }
-        isNewChat = true; // Set flag bahwa ini adalah chat baru
-        // Menghapus status aktif dari semua history item
+        conversationHistory = []; // PENTING: Mengosongkan memori AI
+        attachmentPreview.innerHTML = ''; // Membersihkan pratinjau file
+        fileInput.value = ''; // Mereset input file
         document.querySelectorAll('#history-container .nav-item').forEach(item => item.classList.remove('active'));
         if(body.classList.contains("sidebar-open")) toggleSidebar();
     });
 
-    // --- Auto-resize Textarea ---
-    chatInput.addEventListener('input', () => {
-        chatInput.style.height = 'auto';
-        chatInput.style.height = `${chatInput.scrollHeight}px`;
+    // --- Logika Lampiran File ---
+    attachBtn.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", () => {
+        if (fileInput.files.length > 0) {
+            const fileName = fileInput.files[0].name;
+            attachmentPreview.textContent = `File terlampir: ${fileName}`;
+        }
     });
 
-    // --- Fungsi Pengiriman Pesan ---
+    // --- Auto-resize Textarea ---
+    chatInput.addEventListener('input', () => { chatInput.style.height = 'auto'; chatInput.style.height = `${chatInput.scrollHeight}px`; });
+
+    // --- Fungsi Pengiriman Pesan (Besar) ---
     const handleSendMessage = async () => {
         const prompt = chatInput.value.trim();
         if (!prompt) return;
 
         if (welcomeScreen) welcomeScreen.style.display = 'none';
         
-        // Hanya buat history item jika ini adalah pesan pertama dari chat baru
-        if (isNewChat) {
+        if (conversationHistory.length === 0) {
             createHistoryItem(prompt);
-            isNewChat = false; // Setelah pesan pertama, ini bukan lagi chat baru
         }
         
         appendMessage('user', prompt);
+        conversationHistory.push({ role: 'user', parts: [{ text: prompt }] });
+
         chatInput.value = '';
         chatInput.style.height = 'auto';
         const loadingIndicator = appendLoadingIndicator();
@@ -86,42 +78,47 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch('/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt }),
+                body: JSON.stringify({ history: conversationHistory }),
             });
             if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
             const result = await response.json();
+            
             loadingIndicator.remove();
-            appendMessage('ai', result.data);
+            appendMessage('model', result.data); // 'model' adalah peran AI
+            conversationHistory.push({ role: 'model', parts: [{ text: result.data }] });
         } catch (error) {
             console.error("Error fetching AI response:", error);
             loadingIndicator.remove();
-            appendMessage('ai', 'Maaf, terjadi kesalahan. Coba lagi nanti.');
+            appendMessage('model', 'Maaf, terjadi kesalahan. 🤖 Mari kita coba lagi.');
         }
     };
 
-    // --- Event Listener untuk Kirim ---
+    // --- Event Listener Kirim ---
     sendBtn.addEventListener("click", handleSendMessage);
-    chatInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            handleSendMessage();
-        }
-    });
+    chatInput.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } });
 
-    // --- Fungsi untuk Menampilkan Pesan ---
-    function appendMessage(sender, text) {
+    // --- Fungsi Tampilan Pesan (dengan Markdown) ---
+    function appendMessage(role, text) {
         const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${sender}`;
-        messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+        messageDiv.className = `message ${role === 'user' ? 'user' : 'ai'}`;
+        
+        if (role !== 'user' && window.marked) {
+            messageDiv.innerHTML = marked.parse(text);
+        } else {
+            messageDiv.textContent = text;
+        }
         chatContainer.appendChild(messageDiv);
         scrollToBottom();
     }
 
-    // --- Fungsi untuk Menampilkan Loading Spinner ---
+    // --- Fungsi Tampilan Loading ---
     function appendLoadingIndicator() {
         const loadingDiv = document.createElement('div');
         loadingDiv.className = 'loading-indicator';
-        loadingDiv.innerHTML = `<div class="spinner"></div>`;
+        loadingDiv.innerHTML = `
+<div class="spinner">
+</div>
+`;
         chatContainer.appendChild(loadingDiv);
         scrollToBottom();
         return loadingDiv;
@@ -129,16 +126,20 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // --- Fungsi untuk Membuat Item History ---
     function createHistoryItem(prompt) {
-        // Hapus status aktif dari item sebelumnya
         document.querySelectorAll('#history-container .nav-item').forEach(item => item.classList.remove('active'));
         
         const historyItem = document.createElement('a');
         historyItem.href = '#';
-        historyItem.className = 'nav-item active'; // Langsung set sebagai aktif
+        historyItem.className = 'nav-item active';
         historyItem.innerHTML = `
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.01L3 11v2h18zM3 16h12v2H3zM21 6H3v2.01L21 8z"></path></svg>
-            <span>${prompt.substring(0, 20) + (prompt.length > 20 ? '...' : '')}</span>
-        `;
+<svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M21 11.01L3 11v2h18zM3 16h12v2H3zM21 6H3v2.01L21 8z">
+    </path>
+</svg>
+<span>
+    ${prompt.substring(0, 20) + (prompt.length > 20 ? '...' : '')}
+</span>
+`;
         historyContainer.prepend(historyItem);
     }
     
@@ -146,4 +147,4 @@ document.addEventListener("DOMContentLoaded", () => {
     function scrollToBottom() {
         chatContainer.scrollTop = chatContainer.scrollHeight;
     }
-});
+});```
