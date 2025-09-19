@@ -70,20 +70,39 @@ body {
     transform: translateX(0);
 }
 
+/* --- DI SINI PERBAIKANNYA --- */
+
 .sidebar-overlay {
     position: fixed;
+
     inset: 0;
+
     background-color: rgba(0, 0, 0, 0.5);
+
     opacity: 0;
+
     visibility: hidden;
-    transition: opacity 0.3s ease;
+
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+
     z-index: 999;
+
+    /* DITAMBAHKAN: Memastikan overlay tidak bisa di-klik saat tersembunyi */
+
+    pointer-events: none;
 }
 
 .sidebar-open .sidebar-overlay {
     opacity: 1;
+
     visibility: visible;
+
+    /* DITAMBAHKAN: Mengaktifkan kembali klik saat sidebar terbuka */
+
+    pointer-events: auto;
 }
+
+/* --- AKHIR PERBAIKAN --- */
 
 .sidebar-header .logo {
     font-size: 22px;
@@ -469,4 +488,10 @@ textarea {
 .attach-btn svg {
     width: 22px;
     height: 22px;
+}
+
+.attachment-preview {
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 8px 16px 0;
 }
