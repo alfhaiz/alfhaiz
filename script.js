@@ -24,10 +24,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteVoiceBtn = document.getElementById('delete-voice-btn');
     const sendVoiceBtn = document.getElementById('send-voice-btn');
     const inputWrapper = document.getElementById('input-wrapper');
+    const modelSelectorBtn = document.getElementById('model-selector-btn');
+    const modelModal = document.getElementById('model-modal');
+    const modelOptions = document.querySelectorAll('.model-option');
+    const modelDisplayName = document.getElementById('model-display-name');
+    const notificationToast = document.getElementById('notification-toast');
 
     // --- State Aplikasi ---
     let allChats = {};
     let currentChatId = null;
+    let currentModel = 'gemini-1.5-flash'; // Model default
     let attachedFile = null;
     let isRecording = false;
     let recognition;
@@ -41,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
         recognition.continuous = true;
         recognition.interimResults = true;
         recognition.lang = 'id-ID';
+
         recognition.onresult = (event) => {
             let interimTranscript = '';
             let finalTranscript = '';
@@ -53,19 +60,22 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             chatInput.value = finalTranscript + interimTranscript;
         };
+
         recognition.onend = () => {
             isRecording = false;
             clearInterval(timerInterval);
             if (recorderStatus) recorderStatus.style.display = 'none';
             if (recorderActions) recorderActions.style.display = 'flex';
         };
+
         recognition.onerror = (event) => {
             console.error("Speech Recognition Error:", event.error);
             isRecording = false;
             clearInterval(timerInterval);
-            voiceRecorderUI.style.display = 'none';
-            inputWrapper.style.display = 'block';
+            if(voiceRecorderUI) voiceRecorderUI.style.display = 'none';
+            if(inputWrapper) inputWrapper.style.display = 'block';
         };
+
     } else {
         if(voiceBtn) voiceBtn.disabled = true;
         console.log("Speech Recognition tidak didukung di browser ini.");
@@ -77,7 +87,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const secs = seconds % 60;
         return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
+
     const createVisualizerBars = () => {
+        if(!waveformVisualizer) return;
         waveformVisualizer.innerHTML = '';
         for (let i = 0; i < 20; i++) {
             const bar = document.createElement('div');
@@ -92,10 +104,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const toggleSidebar = () => body.classList.toggle("sidebar-open");
     if(menuToggleBtn) menuToggleBtn.addEventListener("click", toggleSidebar);
     if(sidebarOverlay) sidebarOverlay.addEventListener("click", toggleSidebar);
+    
     if(moreOptionsBtn) moreOptionsBtn.addEventListener('click', (e) => { e.stopPropagation(); filePopupMenu.classList.toggle('active'); });
-    window.addEventListener("click", () => { if(filePopupMenu) filePopupMenu.classList.remove('active'); });
+    window.addEventListener("click", () => {
+        if(filePopupMenu) filePopupMenu.classList.remove('active');
+        if(modelModal) modelModal.classList.remove('active');
+    });
+
     if(attachFileBtn) attachFileBtn.addEventListener('click', () => { fileInput.removeAttribute('capture'); fileInput.setAttribute('accept', '*/*'); fileInput.click(); });
     if(attachCameraBtn) attachCameraBtn.addEventListener('click', () => { fileInput.setAttribute('capture', 'environment'); fileInput.setAttribute('accept', 'image/*'); fileInput.click(); });
+    
+    // --- Logika Perekaman Suara ---
     if(voiceBtn) voiceBtn.addEventListener('click', () => {
         if (!recognition) return;
         if (isRecording) {
@@ -117,16 +136,50 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 1000);
         }
     });
+
     if(deleteVoiceBtn) deleteVoiceBtn.addEventListener('click', () => {
         chatInput.value = '';
         voiceRecorderUI.style.display = 'none';
         inputWrapper.style.display = 'block';
     });
+
     if(sendVoiceBtn) sendVoiceBtn.addEventListener('click', () => {
         voiceRecorderUI.style.display = 'none';
         inputWrapper.style.display = 'block';
         handleSendMessage();
     });
+
+    // --- Logika Modal Pemilihan Model ---
+    if(modelSelectorBtn) modelSelectorBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        modelModal.classList.add('active');
+    });
+    if(modelModal) modelModal.addEventListener('click', (e) => {
+        if (e.target === modelModal) {
+            modelModal.classList.remove('active');
+        }
+    });
+    modelOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            currentModel = option.dataset.model;
+            const displayName = option.dataset.displayName;
+            modelDisplayName.textContent = displayName;
+            modelOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            modelModal.classList.remove('active');
+            if (displayName === 'qwen 3.5') {
+                showNotification('QWEN 3.5 READY');
+            }
+        });
+    });
+
+    function showNotification(message) {
+        notificationToast.textContent = message;
+        notificationToast.classList.add('show');
+        setTimeout(() => {
+            notificationToast.classList.remove('show');
+        }, 3000);
+    }
 
     // --- Logika Sistem History Chat ---
     if(newChatBtn) newChatBtn.addEventListener("click", (e) => {
@@ -136,6 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(body.classList.contains("sidebar-open")) toggleSidebar();
         newChatBtn.classList.add('active');
     });
+
     function clearChatScreen() {
         const messages = chatContainer.querySelectorAll('.message, .loading-indicator');
         messages.forEach(msg => msg.remove());
@@ -159,8 +213,22 @@ document.addEventListener("DOMContentLoaded", () => {
         if(filePopupMenu) filePopupMenu.classList.remove('active');
     });
 
-    function displayAttachmentPreview(fileName, dataUrl) { /* (Tidak Berubah) */ }
-    function clearAttachment() { /* (Tidak Berubah) */ }
+    function displayAttachmentPreview(fileName, dataUrl) {
+        if(!attachmentPreview) return;
+        attachmentPreview.innerHTML = `
+            <div class="preview-item">
+                ${dataUrl.startsWith('data:image') ? `<img src="${dataUrl}" alt="Preview">` : ''}
+                <span>${fileName}</span>
+                <button class="remove-attachment-btn" id="remove-attachment-btn">&times;</button>
+            </div>`;
+        document.getElementById('remove-attachment-btn').addEventListener('click', clearAttachment);
+    }
+
+    function clearAttachment() {
+        attachedFile = null;
+        if(fileInput) fileInput.value = '';
+        if(attachmentPreview) attachmentPreview.innerHTML = '';
+    }
 
     // --- Auto-resize Textarea ---
     if(chatInput) chatInput.addEventListener('input', () => { chatInput.style.height = 'auto'; chatInput.style.height = `${chatInput.scrollHeight}px`; });
@@ -169,7 +237,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const handleSendMessage = async () => {
         const prompt = chatInput.value.trim();
         if (!prompt && !attachedFile) return;
+
         if (welcomeScreen) welcomeScreen.style.display = 'none';
+        
         if (!currentChatId) {
             currentChatId = `chat_${Date.now()}`;
             allChats[currentChatId] = [];
@@ -186,29 +256,35 @@ document.addEventListener("DOMContentLoaded", () => {
         chatInput.value = '';
         chatInput.style.height = 'auto';
         clearAttachment();
-        const loadingState = appendLoadingIndicator(); // Dapatkan state loading
+        const loadingState = appendLoadingIndicator();
 
         abortController = new AbortController();
         generateBtn.classList.add('generating');
         let seconds = 0;
         const generationTimer = setInterval(() => {
             seconds++;
-            if(generateBtn.querySelector('.stop-timer')) generateBtn.querySelector('.stop-timer').textContent = formatTime(seconds);
+            if(generateBtn.querySelector('.stop-timer')) {
+                generateBtn.querySelector('.stop-timer').textContent = formatTime(seconds);
+            }
         }, 1000);
         
-        generateBtn.onclick = () => { abortController.abort(); };
+        generateBtn.onclick = () => {
+            abortController.abort();
+        };
 
         try {
             const response = await fetch('/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 signal: abortController.signal,
-                body: JSON.stringify({ history: allChats[currentChatId] }),
+                body: JSON.stringify({ 
+                    history: allChats[currentChatId],
+                    model: currentModel
+                }),
             });
             if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
             const result = await response.json();
             
-            // Logika Transisi Loading ke Jawaban
             clearInterval(loadingState.intervalId);
             const loadingTextElement = loadingState.element.querySelector('.loading-text');
             if(loadingTextElement) loadingTextElement.textContent = "Tentu, ini dia!";
@@ -217,11 +293,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 loadingState.element.remove();
                 appendMessage('model', result.data);
                 allChats[currentChatId].push({ role: 'model', parts: [{ text: result.data }] });
-            }, 700); // Jeda 0.7 detik
+            }, 700);
 
         } catch (error) {
-            clearInterval(loadingState.intervalId); // Hentikan interval jika error
-            loadingState.element.remove(); // Hapus loading indicator
+            clearInterval(loadingState.intervalId);
+            loadingState.element.remove();
             if (error.name === 'AbortError') {
                 appendMessage('model', 'Respon dihentikan.');
             } else {
@@ -243,43 +319,45 @@ document.addEventListener("DOMContentLoaded", () => {
     function appendMessage(role, text, imageUrl = null) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${role === 'user' ? 'user' : 'ai'}`;
-        if (imageUrl) { const img = document.createElement('img'); img.src = imageUrl; img.alt = "Lampiran"; messageDiv.appendChild(img); }
+        
+        if (imageUrl) {
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.alt = "Lampiran";
+            messageDiv.appendChild(img);
+        }
         if (text) {
              const p = document.createElement('p');
-             if (role !== 'user' && window.marked) p.innerHTML = marked.parse(text.replace(/</g, "&lt;").replace(/>/g, "&gt;"));
-             else p.textContent = text;
+             if (role !== 'user' && window.marked) {
+                p.innerHTML = marked.parse(text.replace(/</g, "&lt;").replace(/>/g, "&gt;"));
+             } else {
+                p.textContent = text;
+             }
              messageDiv.appendChild(p);
         }
         if(chatContainer) chatContainer.appendChild(messageDiv);
         scrollToBottom();
     }
     
-    // --- Fungsi Loading Indicator BARU ---
+    // --- Fungsi Loading Indicator ---
     function appendLoadingIndicator() {
         const loadingDiv = document.createElement('div');
         loadingDiv.className = 'loading-indicator';
-        
         const loadingPhrases = ["Tunggu sebentar...", "Alfhaiz sedang berfikir...", "Menyusun jawaban..."];
-        
         const loaderIcon = document.createElement('div');
         loaderIcon.className = 'gemini-loader';
-        
         const loadingText = document.createElement('span');
         loadingText.className = 'loading-text';
         loadingText.textContent = loadingPhrases[0];
-
         loadingDiv.appendChild(loaderIcon);
         loadingDiv.appendChild(loadingText);
-        
         if(chatContainer) chatContainer.appendChild(loadingDiv);
         scrollToBottom();
-
         let phraseIndex = 1;
         const textInterval = setInterval(() => {
             loadingText.textContent = loadingPhrases[phraseIndex % loadingPhrases.length];
             phraseIndex++;
-        }, 2000); // Ganti teks setiap 2 detik
-
+        }, 2000);
         return { element: loadingDiv, intervalId: textInterval };
     }
     
@@ -301,7 +379,6 @@ document.addEventListener("DOMContentLoaded", () => {
         currentChatId = chatId;
         clearChatScreen();
         if (welcomeScreen) welcomeScreen.style.display = 'none';
-
         const chatHistory = allChats[chatId];
         chatHistory.forEach(message => {
             const text = message.parts.find(p => p.text)?.text || '';
@@ -314,10 +391,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setActiveHistoryItem(chatId) {
         document.querySelectorAll('#history-container .nav-item').forEach(item => {
-            if (item.dataset.chatId === chatId) item.classList.add('active');
-            else item.classList.remove('active');
+            if (item.dataset.chatId === chatId) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
         });
-        if (chatId) newChatBtn.classList.remove('active');
+        if (chatId) {
+            newChatBtn.classList.remove('active');
+        }
     }
     
     function scrollToBottom() { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; }
