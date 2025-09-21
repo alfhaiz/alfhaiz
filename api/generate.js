@@ -1,9 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Inisialisasi model
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Konfigurasi model (tetap sama)
 const generationConfig = {
   temperature: 0.7,
   topP: 1,
@@ -24,36 +22,33 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { history } = req.body;
+        // MENERIMA MODEL DARI FRONTEND
+        const { history, model } = req.body;
 
         if (!history || history.length === 0) {
             return res.status(400).json({ error: 'Conversation history is required.' });
         }
         
-        const model = genAI.getGenerativeModel({ 
-            model: "gemini-2.5-flash",
+        // MENGGUNAKAN MODEL YANG DIPILIH SECARA DINAMIS
+        const generativeModel = genAI.getGenerativeModel({ 
+            model: model || "gemini-1.5-flash", // Default ke flash jika tidak ada
             systemInstruction: `Kamu adalah Alfhaiz, asisten AI yang sangat ramah, cerdas, dan membantu.
-            - SELALU gunakan emoji yang relevan di setiap respon untuk membuat suasana lebih bersahabat .
+            - SELALU gunakan emoji yang relevan di setiap respon untuk membuat suasana lebih bersahabat 😊.
             - Jawabanmu harus terstruktur dengan baik. Gunakan Markdown seperti heading, daftar (list), dan tebal (bold) agar mudah dibaca.
             - Kamu sangat baik dalam membantu tugas sehari-hari, seperti membuat ringkasan, menulis email, atau memberikan ide.
-            - Kamu bisa menganalisis data dalam bentuk teks yang diberikan oleh pengguna.
             - Jika pengguna memberikan gambar atau file, kamu WAJIB menganalisisnya dan menjawab berdasarkan konten file tersebut.
             - Selalu berikan umpan balik yang membangun dan saran yang bermanfaat.
-            - Jaga agar jawaban tetap positif dan bersemangat! `,
+            - Jaga agar jawaban tetap positif dan bersemangat! ✨`,
         });
 
-        const chat = model.startChat({
+        const chat = generativeModel.startChat({
             history: history.slice(0, -1),
             generationConfig,
             safetySettings,
         });
 
-        // --- DI SINI PERBAIKANNYA ---
-        // Sebelumnya: kita hanya mengirim teksnya saja.
-        // Sekarang: kita mengirim SELURUH 'parts' dari pesan terakhir, yang bisa berisi teks, gambar, atau keduanya.
         const lastUserMessageParts = history[history.length - 1].parts;
         const result = await chat.sendMessage(lastUserMessageParts);
-        // --- AKHIR PERBAIKAN ---
 
         const response = result.response;
         const text = response.text();
