@@ -50,8 +50,6 @@ body { font-family: var(--font-family); background-color: var(--bg-main); color:
 .message.ai { align-self: flex-start; animation: smoothFadeInUp 0.7s ease-out forwards; }
 .message.user { align-self: flex-end; display: flex; flex-direction: column; align-items: flex-end; }
 .message img { max-width: 100%; border-radius: 8px; margin-bottom: 8px; }
-
-/* --- LOADING INDIKATOR & INPUT AREA --- */
 .loading-indicator { align-self: flex-start; display: flex; align-items: center; gap: 12px; padding: 10px 0; }
 .gemini-loader { position: relative; width: 24px; height: 24px; animation: spin 2s linear infinite; }
 .gemini-loader::before, .gemini-loader::after { content: ''; position: absolute; top: 50%; left: 50%; width: 100%; height: 2px; background: conic-gradient(from var(--angle), #d8b4fe, #f472b6, #f87171, #facc15, #a3e635, #4ade80, #67e8f9, #a5b4fc, #d8b4fe); animation: rgb-border-flow 3s linear infinite; transform-origin: center; }
@@ -92,8 +90,19 @@ textarea::placeholder { color: var(--text-secondary); }
 .model-option { padding: 16px; border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s ease; }
 .model-option:hover { border-color: var(--accent-color); background-color: #F9FAFB; }
 .model-option.selected { border-color: var(--accent-color); background-color: #F9FAFB; box-shadow: 0 0 0 2px var(--accent-color); }
-.model-option h4 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.model-option h4 { font-size: 16px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; } /* DITAMBAHKAN */
 .model-option p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+
+/* DITAMBAHKAN: GAYA UNTUK PIN "NEW" */
+.new-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 50px;
+    background: linear-gradient(90deg, #4ade80, #34d399);
+    color: white;
+    text-transform: uppercase;
+}
 
 /* --- NOTIFIKASI TOAST BARU --- */
 .notification-toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background-color: var(--text-primary); color: white; padding: 12px 20px; border-radius: 50px; font-weight: 500; z-index: 3000; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: top 0.4s ease-in-out; }
