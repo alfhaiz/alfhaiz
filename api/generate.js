@@ -6,7 +6,7 @@ const generationConfig = {
   temperature: 0.7,
   topP: 1,
   topK: 1,
-  maxOutputTokens: 2048,
+  maxOutputTokens: 8192, // Diperbesar untuk menampung kode
 };
 
 const safetySettings = [
@@ -16,29 +16,41 @@ const safetySettings = [
   { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
 ];
 
+// DITAMBAHKAN: Instruksi terpisah untuk setiap mode
+const SYSTEM_INSTRUCTIONS = {
+    chat: `Kamu adalah Alfhaiz, asisten AI yang sangat ramah, cerdas, dan membantu.
+            - SELALU gunakan emoji yang relevan di setiap respon untuk membuat suasana lebih bersahabat .
+            - Jawabanmu harus terstruktur dengan baik. Gunakan Markdown.
+            - Kamu bisa menganalisis gambar atau file dan menjawab berdasarkan kontennya.
+            - Selalu berikan umpan balik yang membangun dan saran yang bermanfaat.
+            - Jaga agar jawaban tetap positif dan bersemangat! `,
+    agent: `ANDA ADALAH "AGENT DEV". Peran Anda adalah sebagai expert front-end developer.
+            - Pengguna akan memberikan perintah untuk membuat komponen web.
+            - TUGAS UTAMA ANDA: HANYA merespon dengan kode HTML, CSS, dan JavaScript yang lengkap dan bisa langsung dijalankan.
+            - JANGAN berikan penjelasan, jangan gunakan emoji, jangan menyapa.
+            - Struktur kode harus dalam satu file HTML. Letakkan CSS di dalam tag <style> dan JavaScript di dalam tag <script>.
+            - Pastikan kode yang Anda buat modern, bersih, dan responsif.
+            - Contoh: Jika user meminta "buatkan tombol subscribe warna merah", Anda HANYA menjawab dengan kode HTML yang berisi tombol tersebut, lengkap dengan CSS-nya.`
+};
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).end(`Method ${req.method} Not Allowed`);
     }
 
     try {
-        // MENERIMA MODEL DARI FRONTEND
-        const { history, model } = req.body;
+        const { history, model, mode } = req.body; // Menerima 'mode'
 
         if (!history || history.length === 0) {
             return res.status(400).json({ error: 'Conversation history is required.' });
         }
         
-        // MENGGUNAKAN MODEL YANG DIPILIH SECARA DINAMIS
+        // Memilih instruksi sistem berdasarkan mode
+        const systemInstruction = SYSTEM_INSTRUCTIONS[mode] || SYSTEM_INSTRUCTIONS['chat'];
+
         const generativeModel = genAI.getGenerativeModel({ 
-            model: model || "gemini-1.5-flash", // Default ke flash jika tidak ada
-            systemInstruction: `Kamu adalah Alfhaiz, asisten AI yang sangat ramah, cerdas, dan membantu.
-            - SELALU gunakan emoji yang relevan di setiap respon untuk membuat suasana lebih bersahabat 😊.
-            - Jawabanmu harus terstruktur dengan baik. Gunakan Markdown seperti heading, daftar (list), dan tebal (bold) agar mudah dibaca.
-            - Kamu sangat baik dalam membantu tugas sehari-hari, seperti membuat ringkasan, menulis email, atau memberikan ide.
-            - Jika pengguna memberikan gambar atau file, kamu WAJIB menganalisisnya dan menjawab berdasarkan konten file tersebut.
-            - Selalu berikan umpan balik yang membangun dan saran yang bermanfaat.
-            - Jaga agar jawaban tetap positif dan bersemangat! ✨`,
+            model: model || "gemini-2.0-flash",
+            systemInstruction: systemInstruction,
         });
 
         const chat = generativeModel.startChat({
@@ -59,4 +71,4 @@ export default async function handler(req, res) {
         console.error('Error calling Gemini API:', error);
         return res.status(500).json({ error: 'Failed to get response from AI.' });
     }
-}
+}```
