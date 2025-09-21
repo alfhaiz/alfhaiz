@@ -7,49 +7,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const chatContainer = document.getElementById("chat-container");
     const welcomeScreen = document.getElementById("welcome-screen");
     const chatInput = document.getElementById("chat-input");
-    const sendBtn = document.getElementById("send-btn");
+    const generateBtn = document.getElementById("generate-btn");
     const historyContainer = document.getElementById("history-container");
-    const optionsBtn = document.getElementById("options-btn");
-    const optionsMenu = document.getElementById("options-menu");
-    const exportChatBtn = document.getElementById("export-chat-btn");
-    const deleteChatBtn = document.getElementById("delete-chat-btn");
-    const attachmentPreview = document.getElementById("attachment-preview");
-
-    // --- Elemen Menu Aksi BARU ---
-    const actionMenuContainer = document.getElementById('action-menu-container');
-    const actionToggleBtn = document.getElementById('action-toggle-btn');
-    const attachImageBtn = document.getElementById('attach-image-btn');
-    const attachFileBtn = document.getElementById('attach-file-btn');
-    const attachCameraBtn = document.getElementById('attach-camera-btn');
-    const imageFileInput = document.getElementById('image-file-input');
-    const otherFileInput = document.getElementById('other-file-input');
+    const voiceBtn = document.getElementById('voice-btn');
+    const moreOptionsBtn = document.getElementById('more-options-btn');
+    const fileInput = document.getElementById('file-input');
 
     // --- Variabel State Aplikasi ---
     let conversationHistory = [];
-    let attachedFile = null;
 
-    // --- Sidebar & Menu Opsi Atas ---
+    // --- Sidebar & Menu ---
     const toggleSidebar = () => body.classList.toggle("sidebar-open");
     menuToggleBtn.addEventListener("click", toggleSidebar);
     sidebarOverlay.addEventListener("click", toggleSidebar);
-    optionsBtn.addEventListener("click", (e) => { e.stopPropagation(); optionsMenu.classList.toggle("active"); });
-
-    // --- Logika Menu Aksi (+ jadi X) BARU ---
-    actionToggleBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        actionMenuContainer.classList.toggle('open');
-    });
-
-    // --- Menutup semua menu jika klik di luar ---
-    window.addEventListener("click", () => {
-        optionsMenu.classList.remove("active");
-        actionMenuContainer.classList.remove('open');
-    });
-
-    // --- Fungsionalitas Tombol Popup ---
-    attachImageBtn.addEventListener('click', () => { imageFileInput.setAttribute('capture', ''); imageFileInput.click(); });
-    attachFileBtn.addEventListener('click', () => otherFileInput.click());
-    attachCameraBtn.addEventListener('click', () => { imageFileInput.setAttribute('capture', 'environment'); imageFileInput.click(); });
+    
+    // --- Placeholder untuk tombol baru ---
+    voiceBtn.addEventListener('click', () => alert('Fungsi Voice akan segera hadir!'));
+    moreOptionsBtn.addEventListener('click', () => alert('Opsi lainnya akan segera hadir! Di sini Anda bisa menambahkan lampiran file.'));
 
 
     // --- Fungsi "New Chat" ---
@@ -59,77 +33,34 @@ document.addEventListener("DOMContentLoaded", () => {
         messages.forEach(msg => msg.remove());
         if (welcomeScreen) { welcomeScreen.style.display = 'block'; }
         conversationHistory = [];
-        clearAttachment();
         document.querySelectorAll('#history-container .nav-item').forEach(item => item.classList.remove('active'));
         if(body.classList.contains("sidebar-open")) toggleSidebar();
     });
 
-    // --- Logika Penanganan File (BARU) ---
-    function handleFileSelection(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const dataUrl = reader.result;
-            const base64Data = dataUrl.split(',')[1];
-            
-            attachedFile = {
-                mimeType: file.type,
-                base64: base64Data
-            };
-            
-            displayAttachmentPreview(file.name, dataUrl);
-        };
-        reader.readAsDataURL(file);
-        actionMenuContainer.classList.remove('open'); // Tutup popup setelah memilih
-    }
-
-    imageFileInput.addEventListener('change', handleFileSelection);
-    otherFileInput.addEventListener('change', handleFileSelection);
-
-    function displayAttachmentPreview(fileName, dataUrl) {
-        attachmentPreview.innerHTML = `
-            <div class="preview-item">
-                ${dataUrl.startsWith('data:image') ? `<img src="${dataUrl}" alt="Preview">` : ''}
-                <span>${fileName}</span>
-                <button class="remove-attachment-btn" id="remove-attachment-btn">&times;</button>
-            </div>
-        `;
-        document.getElementById('remove-attachment-btn').addEventListener('click', clearAttachment);
-    }
-
-    function clearAttachment() {
-        attachedFile = null;
-        imageFileInput.value = '';
-        otherFileInput.value = '';
-        attachmentPreview.innerHTML = '';
-    }
-
     // --- Auto-resize Textarea ---
-    chatInput.addEventListener('input', () => { chatInput.style.height = 'auto'; chatInput.style.height = `${chatInput.scrollHeight}px`; });
+    chatInput.addEventListener('input', () => { 
+        chatInput.style.height = 'auto'; 
+        chatInput.style.height = `${chatInput.scrollHeight}px`; 
+        // Sembunyikan placeholder jika user mulai mengetik
+        const placeholder = chatInput.parentElement.querySelector('::before');
+        if (placeholder) {
+            placeholder.style.display = chatInput.value.length > 0 ? 'none' : 'block';
+        }
+    });
 
     // --- Fungsi Pengiriman Pesan ---
     const handleSendMessage = async () => {
         const prompt = chatInput.value.trim();
-        if (!prompt && !attachedFile) return;
+        if (!prompt) return;
 
         if (welcomeScreen) welcomeScreen.style.display = 'none';
-        if (conversationHistory.length === 0 && prompt) { createHistoryItem(prompt); }
+        if (conversationHistory.length === 0) { createHistoryItem(prompt); }
         
-        const userParts = [];
-        if (prompt) userParts.push({ text: prompt });
-        if (attachedFile) {
-            userParts.push({ inlineData: { mimeType: attachedFile.mimeType, data: attachedFile.base64 } });
-            appendMessage('user', prompt, `data:${attachedFile.mimeType};base64,${attachedFile.base64}`);
-        } else {
-            appendMessage('user', prompt);
-        }
+        appendMessage('user', prompt);
+        conversationHistory.push({ role: 'user', parts: [{ text: prompt }] });
 
-        conversationHistory.push({ role: 'user', parts: userParts });
         chatInput.value = '';
         chatInput.style.height = 'auto';
-        clearAttachment();
         const loadingIndicator = appendLoadingIndicator();
 
         try {
@@ -147,15 +78,15 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             console.error("Error fetching AI response:", error);
             loadingIndicator.remove();
-            appendMessage('model', 'Maaf, terjadi kesalahan.  Mari kita coba lagi.');
+            appendMessage('model', 'Maaf, terjadi kesalahan. 🤖 Mari kita coba lagi.');
         }
     };
 
     // --- Event Listener Kirim ---
-    sendBtn.addEventListener("click", handleSendMessage);
+    generateBtn.addEventListener("click", handleSendMessage);
     chatInput.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } });
 
-    // --- Fungsi Tampilan Pesan ---
+    // --- Fungsi Tampilan Pesan (dengan Markdown) ---
     function appendMessage(role, text, imageUrl = null) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${role === 'user' ? 'user' : 'ai'}`;
