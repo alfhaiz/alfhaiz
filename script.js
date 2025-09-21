@@ -11,20 +11,42 @@ document.addEventListener("DOMContentLoaded", () => {
     const historyContainer = document.getElementById("history-container");
     const voiceBtn = document.getElementById('voice-btn');
     const moreOptionsBtn = document.getElementById('more-options-btn');
+    const filePopupMenu = document.getElementById('file-popup-menu');
+    const attachFileBtn = document.getElementById('attach-file-btn');
+    const attachCameraBtn = document.getElementById('attach-camera-btn');
     const fileInput = document.getElementById('file-input');
+    const attachmentPreview = document.getElementById("attachment-preview");
 
     // --- Variabel State Aplikasi ---
     let conversationHistory = [];
+    let attachedFile = null;
 
     // --- Sidebar & Menu ---
     const toggleSidebar = () => body.classList.toggle("sidebar-open");
     menuToggleBtn.addEventListener("click", toggleSidebar);
     sidebarOverlay.addEventListener("click", toggleSidebar);
-    
-    // --- Placeholder untuk tombol baru ---
     voiceBtn.addEventListener('click', () => alert('Fungsi Voice akan segera hadir!'));
-    moreOptionsBtn.addEventListener('click', () => alert('Opsi lainnya akan segera hadir! Di sini Anda bisa menambahkan lampiran file.'));
 
+    // --- Logika Menu Popup File BARU ---
+    moreOptionsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        filePopupMenu.classList.toggle('active');
+    });
+    window.addEventListener("click", () => {
+        filePopupMenu.classList.remove('active');
+    });
+    
+    // --- Fungsionalitas Tombol Popup ---
+    attachFileBtn.addEventListener('click', () => {
+        fileInput.removeAttribute('capture');
+        fileInput.setAttribute('accept', '*/*'); // Terima semua jenis file
+        fileInput.click();
+    });
+    attachCameraBtn.addEventListener('click', () => {
+        fileInput.setAttribute('capture', 'environment');
+        fileInput.setAttribute('accept', 'image/*'); // Hanya terima gambar dari kamera
+        fileInput.click();
+    });
 
     // --- Fungsi "New Chat" ---
     newChatBtn.addEventListener("click", (e) => {
@@ -33,34 +55,67 @@ document.addEventListener("DOMContentLoaded", () => {
         messages.forEach(msg => msg.remove());
         if (welcomeScreen) { welcomeScreen.style.display = 'block'; }
         conversationHistory = [];
+        clearAttachment();
         document.querySelectorAll('#history-container .nav-item').forEach(item => item.classList.remove('active'));
         if(body.classList.contains("sidebar-open")) toggleSidebar();
     });
 
-    // --- Auto-resize Textarea ---
-    chatInput.addEventListener('input', () => { 
-        chatInput.style.height = 'auto'; 
-        chatInput.style.height = `${chatInput.scrollHeight}px`; 
-        // Sembunyikan placeholder jika user mulai mengetik
-        const placeholder = chatInput.parentElement.querySelector('::before');
-        if (placeholder) {
-            placeholder.style.display = chatInput.value.length > 0 ? 'none' : 'block';
-        }
+    // --- Logika Penanganan File ---
+    fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const dataUrl = reader.result;
+            const base64Data = dataUrl.split(',')[1];
+            attachedFile = { mimeType: file.type, base64: base64Data };
+            displayAttachmentPreview(file.name, dataUrl);
+        };
+        reader.readAsDataURL(file);
+        filePopupMenu.classList.remove('active');
     });
+
+    function displayAttachmentPreview(fileName, dataUrl) {
+        attachmentPreview.innerHTML = `
+            <div class="preview-item">
+                ${dataUrl.startsWith('data:image') ? `<img src="${dataUrl}" alt="Preview">` : ''}
+                <span>${fileName}</span>
+                <button class="remove-attachment-btn" id="remove-attachment-btn">&times;</button>
+            </div>`;
+        document.getElementById('remove-attachment-btn').addEventListener('click', clearAttachment);
+    }
+
+    function clearAttachment() {
+        attachedFile = null;
+        fileInput.value = '';
+        attachmentPreview.innerHTML = '';
+    }
+
+    // --- Auto-resize Textarea ---
+    chatInput.addEventListener('input', () => { chatInput.style.height = 'auto'; chatInput.style.height = `${chatInput.scrollHeight}px`; });
 
     // --- Fungsi Pengiriman Pesan ---
     const handleSendMessage = async () => {
         const prompt = chatInput.value.trim();
-        if (!prompt) return;
+        if (!prompt && !attachedFile) return;
 
         if (welcomeScreen) welcomeScreen.style.display = 'none';
-        if (conversationHistory.length === 0) { createHistoryItem(prompt); }
+        if (conversationHistory.length === 0 && prompt) { createHistoryItem(prompt); }
         
-        appendMessage('user', prompt);
-        conversationHistory.push({ role: 'user', parts: [{ text: prompt }] });
+        const userParts = [];
+        if (attachedFile) {
+            userParts.push({ inlineData: { mimeType: attachedFile.mimeType, data: attachedFile.base64 } });
+        }
+        if (prompt) {
+            userParts.push({ text: prompt });
+        }
+
+        appendMessage('user', prompt, attachedFile ? `data:${attachedFile.mimeType};base64,${attachedFile.base64}` : null);
+        conversationHistory.push({ role: 'user', parts: userParts });
 
         chatInput.value = '';
         chatInput.style.height = 'auto';
+        clearAttachment();
         const loadingIndicator = appendLoadingIndicator();
 
         try {
@@ -86,18 +141,28 @@ document.addEventListener("DOMContentLoaded", () => {
     generateBtn.addEventListener("click", handleSendMessage);
     chatInput.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } });
 
-    // --- Fungsi Tampilan Pesan (dengan Markdown) ---
+    // --- Fungsi Tampilan Pesan (DIPERBARUI) ---
     function appendMessage(role, text, imageUrl = null) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${role === 'user' ? 'user' : 'ai'}`;
-        let content = '';
-        if (text) {
-             content += (role !== 'user' && window.marked) ? marked.parse(text.replace(/</g, "&lt;").replace(/>/g, "&gt;")) : `<p>${text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`;
-        }
+        
+        // Untuk pesan user, gambar muncul di atas teks
         if (imageUrl) {
-            content += `<img src="${imageUrl}" alt="Lampiran">`;
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.alt = "Lampiran";
+            messageDiv.appendChild(img);
         }
-        messageDiv.innerHTML = content;
+        if (text) {
+             const p = document.createElement('p');
+             if (role !== 'user' && window.marked) {
+                p.innerHTML = marked.parse(text.replace(/</g, "&lt;").replace(/>/g, "&gt;"));
+             } else {
+                p.textContent = text;
+             }
+             messageDiv.appendChild(p);
+        }
+        
         chatContainer.appendChild(messageDiv);
         scrollToBottom();
     }
