@@ -1,5 +1,6 @@
 :root {
     --bg-main: #FFFFFF;
+    --bg-sidebar: #F9FAFB;
     --text-primary: #1F2937;
     --text-secondary: #6B7280;
     --border-color: #E5E7EB;
@@ -8,15 +9,24 @@
     --gradient-vip: linear-gradient(90deg, #F472B6, #D946EF);
 }
 
+/* --- DARK MODE BARU --- */
+body.dark-mode {
+    --bg-main: #111827;
+    --bg-sidebar: #1F2937;
+    --text-primary: #F9FAFB;
+    --text-secondary: #9CA3AF;
+    --border-color: #374151;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body { height: 100%; overflow: hidden; }
-body { font-family: var(--font-family); background-color: var(--bg-main); color: var(--text-primary); -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font-family); background-color: var(--bg-main); color: var(--text-primary); -webkit-font-smoothing: antialiased; transition: background-color 0.3s ease, color 0.3s ease; }
 .app-container, .main-content { height: 100dvh; height: -webkit-fill-available; }
 .app-container { display: flex; width: 100vw; position: relative; }
 
 /* --- SIDEBAR & OVERLAY --- */
-.sidebar { background-color: #F9FAFB; width: 260px; padding: 16px; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); transition: transform 0.3s ease; z-index: 1000; border-right: 1px solid var(--border-color); }
+.sidebar { background-color: var(--bg-sidebar); width: 260px; padding: 16px; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); transition: transform 0.3s ease, background-color 0.3s ease; z-index: 1000; border-right: 1px solid var(--border-color); }
 .sidebar-open .sidebar { transform: translateX(0); }
 .sidebar-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 999; pointer-events: none; }
 .sidebar-open .sidebar-overlay { opacity: 1; visibility: visible; pointer-events: auto; }
@@ -24,19 +34,19 @@ body { font-family: var(--font-family); background-color: var(--bg-main); color:
 .sidebar-nav { overflow-y: auto; flex-grow: 1; }
 .nav-section-title { font-size: 11px; color: var(--text-secondary); padding: 24px 8px 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; text-decoration: none; color: var(--text-secondary); font-size: 15px; font-weight: 500; transition: all 0.2s ease; cursor: pointer; }
-.nav-item:hover { background-color: #F3F4F6; color: var(--text-primary); }
-.nav-item.active { background-color: #E5E7EB; color: var(--text-primary); font-weight: 600; }
+.dark-mode .nav-item:hover { background-color: #374151; }
+.nav-item.active { background-color: var(--border-color); color: var(--text-primary); font-weight: 600; }
 .nav-icon { width: 20px; height: 20px; fill: currentColor; }
 .sidebar-footer { margin-top: auto; padding-top: 10px; }
 .auth-button { color: var(--text-secondary); }
 
 /* --- KONTEN UTAMA & HEADER --- */
-.main-content { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-main); }
+.main-content { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-main); transition: background-color 0.3s ease; }
 .main-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; flex-shrink: 0; }
 .menu-toggle { background: none; border: none; cursor: pointer; padding: 8px; }
 .menu-toggle svg { width: 24px; height: 24px; fill: var(--text-primary); }
 .model-selector { display: flex; align-items: center; gap: 4px; padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 50px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 0.2s ease; }
-.model-selector:hover { background-color: #F9FAFB; }
+.dark-mode .model-selector:hover { background-color: #374151; }
 .model-selector svg { width: 20px; height: 20px; }
 .vip-btn { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: none; border-radius: 50px; color: white; background: var(--gradient-vip); cursor: pointer; font-weight: 600; animation: gradient-flow 5s linear infinite; background-size: 200% auto; }
 .vip-btn svg { width: 20px; height: 20px; }
@@ -59,52 +69,74 @@ body { font-family: var(--font-family); background-color: var(--bg-main); color:
 @property --angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 @keyframes rgb-border-flow { from { --angle: 0deg; } to { --angle: 360deg; } }
 .input-area-container { padding: 8px 16px 24px; flex-shrink: 0; }
-.input-wrapper { position: relative; border-radius: 24px; background: white; padding: 12px 16px; border: 2px solid var(--border-color); transition: border-color 0.3s ease; }
+.input-wrapper { display: flex; align-items: flex-end; gap: 8px; position: relative; border-radius: 24px; background: var(--bg-main); padding: 8px; border: 2px solid var(--border-color); transition: border-color 0.3s ease, background-color 0.3s ease; }
 .input-wrapper:focus-within {
     border-color: transparent;
-    background: linear-gradient(white, white) padding-box, conic-gradient(from var(--angle), #d8b4fe, #f472b6, #f87171, #facc15, #a3e635, #4ade80, #67e8f9, #a5b4fc, #d8b4fe) border-box;
+    background: linear-gradient(var(--bg-main), var(--bg-main)) padding-box, conic-gradient(from var(--angle), #d8b4fe, #f472b6, #f87171, #facc15, #a3e635, #4ade80, #67e8f9, #a5b4fc, #d8b4fe) border-box;
     animation: rgb-border-flow 3s linear infinite;
 }
-.textarea-container { position: relative; padding-left: 10px; }
+.textarea-container { flex-grow: 1; position: relative; padding-left: 10px; }
 .textarea-container::before { content: '|'; position: absolute; left: 0; top: 0; color: #c084fc; animation: blink 1s step-end infinite; font-size: 1.2em; }
-textarea { width: 100%; border: none; outline: none; resize: none; background: transparent; font-family: var(--font-family); font-size: 16px; line-height: 1.5; max-height: 120px; }
+textarea { width: 100%; border: none; outline: none; resize: none; background: transparent; font-family: var(--font-family); font-size: 16px; line-height: 1.5; max-height: 120px; color: var(--text-primary); }
 textarea::placeholder { color: var(--text-secondary); }
-.input-actions { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 8px; }
+.input-actions { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 8px; flex-shrink: 0; }
+.input-actions { align-self: flex-end; }
 .action-btn { display: flex; align-items: center; justify-content: center; background-color: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: background-color 0.2s ease; }
-.action-btn:hover { background-color: #F9FAFB; }
-.action-btn svg { width: 20px; height: 20px; }
-.generate-btn { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border: none; background: var(--text-primary); color: white; border-radius: 50px; font-weight: 500; cursor: pointer; transition: background-color 0.2s ease; }
-.generate-btn:hover { background-color: #374151; }
+.dark-mode .action-btn:hover { background-color: #374151; }
+.generate-btn { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border: none; background: var(--text-primary); color: var(--bg-main); border-radius: 50px; font-weight: 500; cursor: pointer; transition: background-color 0.2s ease; }
+.dark-mode .generate-btn:hover { background-color: #4b5563; }
 .generate-btn .generate-icon { width: 18px; height: 18px; transform: rotate(45deg); }
 .generate-btn .stop-text, .generate-btn .stop-timer { display: none; }
 .generate-btn.generating .generate-text, .generate-btn.generating .generate-icon { display: none; }
 .generate-btn.generating .stop-text, .generate-btn.generating .stop-timer { display: inline; }
 .generate-btn.generating { background-color: #DC2626; }
 
-/* --- MODAL PEMILIHAN MODEL BARU --- */
+/* --- TOMBOL AGENT MODE BARU --- */
+.agent-mode-btn {
+    padding: 8px 12px;
+    border: none;
+    background-color: var(--border-color);
+    color: var(--text-secondary);
+    border-radius: 50px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    margin-bottom: 4px; /* Agar sejajar dengan textarea */
+}
+.agent-mode-btn.active {
+    background: linear-gradient(90deg, #6366F1, #A855F7);
+    color: white;
+    box-shadow: 0 4px 10px rgba(168, 85, 247, 0.4);
+}
+
+/* --- LIVE PREVIEW CONTAINER BARU --- */
+.live-preview-container {
+    display: none; /* Tersembunyi secara default */
+    flex-grow: 1;
+    width: 100%;
+    padding: 0;
+    margin-bottom: 16px;
+}
+.live-preview-container iframe {
+    width: 100%;
+    height: 100%;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+/* --- Modal & Notifikasi --- */
 .modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
 .modal-overlay.active { opacity: 1; visibility: visible; }
-.modal-content { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; transform: scale(0.95); transition: transform 0.3s ease; }
+.modal-content { background: var(--bg-main); padding: 24px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; transform: scale(0.95); transition: transform 0.3s ease; }
 .modal-overlay.active .modal-content { transform: scale(1); }
 .modal-content h3 { font-size: 18px; font-weight: 600; text-align: center; }
 .model-option { padding: 16px; border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s ease; }
-.model-option:hover { border-color: var(--accent-color); background-color: #F9FAFB; }
-.model-option.selected { border-color: var(--accent-color); background-color: #F9FAFB; box-shadow: 0 0 0 2px var(--accent-color); }
-.model-option h4 { font-size: 16px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; } /* DITAMBAHKAN */
+.dark-mode .model-option:hover { border-color: var(--accent-color); background-color: #374151; }
+.model-option.selected { border-color: var(--accent-color); background-color: var(--border-color); box-shadow: 0 0 0 2px var(--accent-color); }
+.model-option h4 { font-size: 16px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
 .model-option p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
-
-/* DITAMBAHKAN: GAYA UNTUK PIN "NEW" */
-.new-badge {
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 50px;
-    background: linear-gradient(90deg, #4ade80, #34d399);
-    color: white;
-    text-transform: uppercase;
-}
-
-/* --- NOTIFIKASI TOAST BARU --- */
+.new-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 50px; background: linear-gradient(90deg, #4ade80, #34d399); color: white; text-transform: uppercase; }
 .notification-toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background-color: var(--text-primary); color: white; padding: 12px 20px; border-radius: 50px; font-weight: 500; z-index: 3000; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: top 0.4s ease-in-out; }
 .notification-toast.show { top: 20px; }
 
@@ -113,10 +145,9 @@ textarea::placeholder { color: var(--text-secondary); }
 .file-popup-menu { position: absolute; bottom: calc(100% + 10px); right: 0; display: flex; flex-direction: column; gap: 8px; background-color: var(--bg-main); padding: 8px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid var(--border-color); opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.2s ease; z-index: 10; }
 .file-popup-menu.active { opacity: 1; visibility: visible; transform: translateY(0); }
 .popup-option { display: flex; align-items: center; gap: 10px; background-color: transparent; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-family: var(--font-family); font-size: 15px; font-weight: 500; color: var(--text-primary); }
-.popup-option:hover { background-color: #F9FAFB; }
-.popup-option svg { width: 20px; height: 20px; color: var(--text-secondary); }
+.dark-mode .popup-option:hover { background-color: #374151; }
 .attachment-preview { padding-bottom: 8px; }
-.preview-item { display: inline-flex; align-items: center; gap: 8px; background-color: #F3F4F6; padding: 6px 12px; border-radius: 16px; font-size: 13px; color: var(--text-secondary); }
+.preview-item { display: inline-flex; align-items: center; gap: 8px; background-color: var(--border-color); padding: 6px 12px; border-radius: 16px; font-size: 13px; color: var(--text-secondary); }
 .preview-item img { width: 24px; height: 24px; border-radius: 4px; object-fit: cover; }
 .preview-item span { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .remove-attachment-btn { background: none; border: none; cursor: pointer; color: var(--text-secondary); font-weight: bold; padding: 0 0 0 8px; font-size: 18px; }
@@ -130,6 +161,7 @@ textarea::placeholder { color: var(--text-secondary); }
 .recorder-btn.send { background-color: var(--text-primary); color: white; }
 .recorder-btn svg { width: 18px; height: 18px; }
 .message .voice-message-container { display: flex; align-items: center; gap: 8px; background-color: #F3F4F6; padding: 8px 12px; border-radius: 16px; }
+.dark-mode .message .voice-message-container { background-color: #374151; }
 .message.user .voice-message-container { background-color: #6366F1; color: white; }
 @keyframes blink { 50% { opacity: 0; } }
 @keyframes wave { 0%, 100% { transform: scaleY(0.2); } 50% { transform: scaleY(1); } }
