@@ -6,7 +6,7 @@ const generationConfig = {
   temperature: 0.7,
   topP: 1,
   topK: 1,
-  maxOutputTokens: 8192, // Diperbesar untuk menampung kode
+  maxOutputTokens: 8192,
 };
 
 const safetySettings = [
@@ -16,7 +16,6 @@ const safetySettings = [
   { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
 ];
 
-// DITAMBAHKAN: Instruksi terpisah untuk setiap mode
 const SYSTEM_INSTRUCTIONS = {
     chat: `Kamu adalah Alfhaiz, asisten AI yang sangat ramah, cerdas, dan membantu.
             - SELALU gunakan emoji yang relevan di setiap respon untuk membuat suasana lebih bersahabat .
@@ -39,13 +38,12 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { history, model, mode } = req.body; // Menerima 'mode'
+        const { history, model, mode } = req.body;
 
         if (!history || history.length === 0) {
             return res.status(400).json({ error: 'Conversation history is required.' });
         }
         
-        // Memilih instruksi sistem berdasarkan mode
         const systemInstruction = SYSTEM_INSTRUCTIONS[mode] || SYSTEM_INSTRUCTIONS['chat'];
 
         const generativeModel = genAI.getGenerativeModel({ 
@@ -71,4 +69,4 @@ export default async function handler(req, res) {
         console.error('Error calling Gemini API:', error);
         return res.status(500).json({ error: 'Failed to get response from AI.' });
     }
-}```
+}
