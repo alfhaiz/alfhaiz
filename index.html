@@ -12,12 +12,11 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- SIDEBAR (Tidak ada perubahan) -->
+        <!-- SIDEBAR -->
         <aside class="sidebar">
             <div class="sidebar-header"><div class="logo">ALFHAIZ</div></div>
             <nav class="sidebar-nav">
                 <p class="nav-section-title">MAIN</p>
-                <a href="#" class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9.47 14.12a.5.5 0 01-.47-.5V13a.5.5 0 01.5-.5h.5a.5.5 0 01.5.5v.62a.5.5 0 01-.5.5h-.53zm4.53 0a.5.5 0 01-.47-.5V13a.5.5 0 01.5-.5h.5a.5.5 0 01.5.5v.62a.5.5 0 01-.5.5h-.53zM15.5 9C14.67 9 14 8.33 14 7.5S14.67 6 15.5 6 17 6.67 17 7.5 16.33 9 15.5 9zm-7 0C7.67 9 7 8.33 7 7.5S7.67 6 8.5 6 10 6.67 10 7.5 9.33 9 8.5 9z"></path></svg><span>Chat with AI</span></a>
                 <a href="#" class="nav-item active" id="new-chat-btn"><svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4V7zm-1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path></svg><span>New Chat</span></a>
                 <p class="nav-section-title">HISTORY</p>
                 <div id="history-container"></div>
@@ -40,49 +39,27 @@
                 </div>
             </div>
 
-            <!-- DIUBAH TOTAL: STRUKTUR INPUT AREA BARU -->
             <footer class="input-area-container">
                 <div class="attachment-preview" id="attachment-preview"></div>
-
-                <!-- DITAMBAHKAN: UI Perekaman Suara (tersembunyi) -->
                 <div class="voice-recorder-ui" id="voice-recorder-ui">
-                    <div class="recorder-status">
-                        <div class="blinking-dot"></div>
-                        <div class="waveform-visualizer" id="waveform-visualizer"></div>
-                        <span class="timer" id="recorder-timer">00:00</span>
-                    </div>
-                    <div class="recorder-actions">
-                         <button class="recorder-btn" id="delete-voice-btn" title="Hapus">
-                             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg>
-                         </button>
-                         <button class="recorder-btn send" id="send-voice-btn" title="Kirim">
-                             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
-                         </button>
-                    </div>
+                    <div class="recorder-status"><div class="blinking-dot"></div><div class="waveform-visualizer" id="waveform-visualizer"></div><span class="timer" id="recorder-timer">00:00</span></div>
+                    <div class="recorder-actions"><button class="recorder-btn" id="delete-voice-btn" title="Hapus"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg></button><button class="recorder-btn send" id="send-voice-btn" title="Kirim"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg></button></div>
                 </div>
 
                 <div class="input-wrapper" id="input-wrapper">
-                    <div class="textarea-container">
-                        <textarea id="chat-input" placeholder="Ask me anything..." rows="1"></textarea>
-                    </div>
+                    <div class="textarea-container"><textarea id="chat-input" placeholder="Ask me anything..." rows="1"></textarea></div>
                     <div class="input-actions">
-                        <button class="action-btn" id="voice-btn">
-                           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"></path></svg>
-                        </button>
+                        <button class="action-btn" id="voice-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"></path></svg></button>
                         <div class="file-menu-container">
-                            <button class="action-btn" id="more-options-btn">
-                               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
-                            </button>
+                            <button class="action-btn" id="more-options-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg></button>
                             <div class="file-popup-menu" id="file-popup-menu">
                                 <button class="popup-option" id="attach-file-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"></path></svg><span>File</span></button>
-                                <button class="popup-option" id="attach-camera-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm-2 4h4c1.1 0 2-.9 2-2v-1.09c.32-.11.63-.25.91-.42l1.5 1.5c.29.29.77.29 1.06 0l1.42-1.42c.29-.29.29-.77 0-1.06l-1.5-1.5c.17-.28.31-.59.42-.91H20c1.1 0 2-.9 2-2v-4c0-1.1-.9-2-2-2h-1.09c-.11-.32-.25-.63-.42-.91l1.5-1.5c-.29-.29-.29-.77 0-1.06L18.49.51c-.29-.29-.77-.29-1.06 0l-1.5 1.5c-.28-.17-.59-.31-.91-.42V1c0-.55-.45-1-1-1h-4c-.55 0-1 .45-1 1v1.09c-.32.11-.63.25-.91-.42l-1.5-1.5c-.29-.29-.77-.29-1.06 0L.51 2.51c-.29.29-.29-.77 0 1.06l1.5 1.5c-.17.28-.31-.59-.42-.91H1c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1h1.09c.11.32.25.63.42.91l-1.5 1.5c-.29.29-.29-.77 0 1.06l1.42 1.42c.29.29.77.29 1.06 0l1.5-1.5c.28.17.59.31.91-.42V19c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1.09c.32-.11.63-.25.91-.42l1.5 1.5c.29.29.77.29 1.06 0l1.42-1.42c.29-.29.29-.77 0-1.06l-1.5-1.5c.17-.28.31-.59.42-.91H19c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1h-1.09c-.11-.32-.25-.63-.42-.91l1.5-1.5c.29-.29.29-.77 0-1.06L18.49.51z"></path></svg><span>Kamera</span></button>
+                                <button class="popup-option" id="attach-camera-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm-2 4h4c1.1 0 2-.9 2-2v-1.09c.32-.11.63-.25.91-.42l1.5 1.5c.29.29.77.29 1.06 0l1.42-1.42c.29-.29.29-.77 0-1.06l-1.5-1.5c.17-.28.31-.59.42-.91H20c1.1 0 2-.9 2-2v-4c0-1.1-.9-2-2-2h-1.09c-.11-.32-.25-.63-.42-.91l1.5-1.5c-.29-.29-.29-.77 0-1.06L18.49.51c-.29-.29-.77-.29-1.06 0l-1.5 1.5c-.28-.17-.59-.31-.91-.42V1c0-.55-.45-1-1-1h-4c-.55 0-1 .45-1 1v1.09c-.32.11-.63.25-.91-.42l-1.5-1.5c-.29-.29-.77-.29-1.06 0L.51 2.51c-.29.29-.29-.77 0 1.06l1.5 1.5c-.17.28-.31-.59-.42-.91H1c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1h1.09c.11.32.25.63.42.91l-1.5 1.5c-.29.29-.29-.77 0 1.06l1.42 1.42c.29.29.77.29 1.06 0l1.5-1.5c.28.17.59.31.91-.42V19c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1.09c.32-.11.63-.25.91-.42l1.5 1.5c.29.29.77.29 1.06 0l1.42-1.42c.29-.29-.29-.77 0-1.06l-1.5-1.5c.17-.28.31-.59.42-.91H19c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1h-1.09c-.11-.32-.25-.63-.42-.91l1.5-1.5c.29-.29.29-.77 0-1.06L18.49.51z"></path></svg><span>Kamera</span></button>
                             </div>
                         </div>
                         <button class="generate-btn" id="generate-btn">
-                            <span class="generate-text">Generate</span>
-                            <svg class="generate-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H7v-2h4V7h2v4h4v2h-4v4h-2z"></path></svg>
-                            <span class="stop-text">Stop</span>
-                            <span class="timer stop-timer">00:00</span>
+                            <span class="generate-text">Generate</span><svg class="generate-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H7v-2h4V7h2v4h4v2h-4v4h-2z"></path></svg>
+                            <span class="stop-text">Stop</span><span class="timer stop-timer">00:00</span>
                         </button>
                     </div>
                 </div>

@@ -26,7 +26,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputWrapper = document.getElementById('input-wrapper');
 
     // --- State Aplikasi ---
-    let conversationHistory = [];
+    let allChats = {}; // Objek untuk menyimpan semua percakapan
+    let currentChatId = null; // ID percakapan yang sedang aktif
     let attachedFile = null;
     let isRecording = false;
     let recognition;
@@ -140,18 +141,23 @@ document.addEventListener("DOMContentLoaded", () => {
         handleSendMessage();
     });
 
-    // --- Fungsi "New Chat" ---
+    // --- Logika Sistem History Chat ---
     if(newChatBtn) newChatBtn.addEventListener("click", (e) => {
         e.preventDefault();
+        currentChatId = null;
+        clearChatScreen();
+        if(body.classList.contains("sidebar-open")) toggleSidebar();
+        newChatBtn.classList.add('active'); // Set 'New Chat' sebagai aktif
+    });
+
+    function clearChatScreen() {
         const messages = chatContainer.querySelectorAll('.message, .loading-indicator');
         messages.forEach(msg => msg.remove());
         if (welcomeScreen) { welcomeScreen.style.display = 'block'; }
-        conversationHistory = [];
         clearAttachment();
         document.querySelectorAll('#history-container .nav-item').forEach(item => item.classList.remove('active'));
-        if(body.classList.contains("sidebar-open")) toggleSidebar();
-    });
-
+    }
+    
     // --- Logika Penanganan File ---
     if(fileInput) fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
@@ -193,14 +199,19 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!prompt && !attachedFile) return;
 
         if (welcomeScreen) welcomeScreen.style.display = 'none';
-        if (conversationHistory.length === 0 && prompt) { createHistoryItem(prompt); }
+        
+        if (!currentChatId) {
+            currentChatId = `chat_${Date.now()}`;
+            allChats[currentChatId] = [];
+            createHistoryItem(currentChatId, prompt || "Chat with attachment");
+        }
         
         const userParts = [];
         if (attachedFile) userParts.push({ inlineData: { mimeType: attachedFile.mimeType, data: attachedFile.base64 } });
         if (prompt) userParts.push({ text: prompt });
 
         appendMessage('user', prompt, attachedFile ? `data:${attachedFile.mimeType};base64,${attachedFile.base64}` : null);
-        conversationHistory.push({ role: 'user', parts: userParts });
+        allChats[currentChatId].push({ role: 'user', parts: userParts });
 
         chatInput.value = '';
         chatInput.style.height = 'auto';
@@ -219,9 +230,6 @@ document.addEventListener("DOMContentLoaded", () => {
         
         generateBtn.onclick = () => {
             abortController.abort();
-            generateBtn.classList.remove('generating');
-            clearInterval(generationTimer);
-            generateBtn.onclick = handleSendMessage;
         };
 
         try {
@@ -229,23 +237,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 signal: abortController.signal,
-                body: JSON.stringify({ history: conversationHistory }),
+                body: JSON.stringify({ history: allChats[currentChatId] }),
             });
             if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
             const result = await response.json();
             
             loadingIndicator.remove();
             appendMessage('model', result.data);
-            conversationHistory.push({ role: 'model', parts: [{ text: result.data }] });
+            allChats[currentChatId].push({ role: 'model', parts: [{ text: result.data }] });
         } catch (error) {
             if (error.name === 'AbortError') {
-                console.log('Fetch aborted by user.');
                 loadingIndicator.remove();
-                appendMessage('model', 'Respon dihentikan. Ada lagi yang bisa dibantu?');
+                appendMessage('model', 'Respon dihentikan.');
             } else {
                 console.error("Error fetching AI response:", error);
                 loadingIndicator.remove();
-                appendMessage('model', 'Maaf, terjadi kesalahan. 🤖 Mari kita coba lagi.');
+                appendMessage('model', 'Maaf, terjadi kesalahan. 🤖');
             }
         } finally {
             generateBtn.classList.remove('generating');
@@ -281,8 +288,59 @@ document.addEventListener("DOMContentLoaded", () => {
         if(chatContainer) chatContainer.appendChild(messageDiv);
         scrollToBottom();
     }
+    
+    // --- Fungsi Sistem History Chat ---
+    function createHistoryItem(chatId, prompt) {
+        if(!historyContainer) return;
+        
+        const historyItem = document.createElement('a');
+        historyItem.href = '#';
+        historyItem.className = 'nav-item';
+        historyItem.dataset.chatId = chatId;
+        historyItem.innerHTML = `<svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.01L3 11v2h18zM3 16h12v2H3zM21 6H3v2.01L21 8z"></path></svg><span>${prompt.substring(0, 20) + (prompt.length > 20 ? '...' : '')}</span>`;
+        
+        historyItem.addEventListener('click', (e) => {
+            e.preventDefault();
+            loadChatHistory(chatId);
+        });
 
-    // --- Fungsi Lainnya ---
+        historyContainer.prepend(historyItem);
+        setActiveHistoryItem(chatId);
+    }
+    
+    function loadChatHistory(chatId) {
+        if (!allChats[chatId]) return;
+        currentChatId = chatId;
+        
+        clearChatScreen();
+        if (welcomeScreen) welcomeScreen.style.display = 'none';
+
+        const chatHistory = allChats[chatId];
+        chatHistory.forEach(message => {
+            const text = message.parts.find(p => p.text)?.text || '';
+            const imagePart = message.parts.find(p => p.inlineData);
+            const imageUrl = imagePart ? `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}` : null;
+            appendMessage(message.role, text, imageUrl);
+        });
+        setActiveHistoryItem(chatId);
+    }
+
+    function setActiveHistoryItem(chatId) {
+        document.querySelectorAll('#history-container .nav-item').forEach(item => {
+            if (item.dataset.chatId === chatId) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+        // Pastikan tombol 'New Chat' tidak aktif jika history yang aktif
+        if (chatId) {
+            newChatBtn.classList.remove('active');
+        }
+    }
+    
+    function scrollToBottom() { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; }
+    
     function appendLoadingIndicator() {
         const loadingDiv = document.createElement('div');
         loadingDiv.className = 'loading-indicator';
@@ -290,19 +348,5 @@ document.addEventListener("DOMContentLoaded", () => {
         if(chatContainer) chatContainer.appendChild(loadingDiv);
         scrollToBottom();
         return loadingDiv;
-    }
-    
-    function createHistoryItem(prompt) {
-        if(!historyContainer) return;
-        document.querySelectorAll('#history-container .nav-item').forEach(item => item.classList.remove('active'));
-        const historyItem = document.createElement('a');
-        historyItem.href = '#';
-        historyItem.className = 'nav-item active';
-        historyItem.innerHTML = `<svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.01L3 11v2h18zM3 16h12v2H3zM21 6H3v2.01L21 8z"></path></svg><span>${prompt.substring(0, 20) + (prompt.length > 20 ? '...' : '')}</span>`;
-        historyContainer.prepend(historyItem);
-    }
-    
-    function scrollToBottom() {
-        if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 });
