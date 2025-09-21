@@ -67,8 +67,6 @@ body { font-family: var(--font-family); background-color: var(--bg-main); color:
 .loading-text { font-size: 14px; color: var(--text-secondary); font-style: italic; }
 @property --angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 @keyframes rgb-border-flow { from { --angle: 0deg; } to { --angle: 360deg; } }
-
-/* --- PERBAIKAN DESAIN INPUT AREA --- */
 .input-area-container { padding: 8px 16px 24px; flex-shrink: 0; }
 .agent-mode-toggle-container { display: flex; justify-content: flex-start; padding-bottom: 8px; }
 .agent-mode-btn { padding: 8px 12px; border: none; background-color: var(--border-color); color: var(--text-secondary); border-radius: 50px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; }
@@ -94,9 +92,13 @@ textarea::placeholder { color: var(--text-secondary); }
 .generate-btn.generating .stop-text, .generate-btn.generating .stop-timer { display: inline; }
 .generate-btn.generating { background-color: #DC2626; }
 
-/* --- LIVE PREVIEW CONTAINER --- */
-.live-preview-container { display: none; flex-grow: 1; width: 100%; padding: 0; margin-bottom: 16px; }
-.live-preview-container iframe { width: 100%; height: 100%; border: 1px solid var(--border-color); border-radius: 12px; }
+/* --- LIVE PREVIEW & LOG CONSOLE BARU --- */
+.live-preview-container { display: none; flex-grow: 1; width: 100%; padding: 0; margin-bottom: 16px; position: relative; }
+.agent-log-console { position: absolute; inset: 0; background-color: #1F2937; color: #F9FAFB; border-radius: 12px; padding: 24px; font-family: 'Courier New', Courier, monospace; overflow-y: auto; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+.log-line { opacity: 0; animation: log-line-appear 0.8s ease-out forwards; margin-bottom: 12px; font-size: 14px; }
+@keyframes log-line-appear { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.log-line .tag { color: #A78BFA; font-weight: bold; }
+.live-preview-container iframe { width: 100%; height: 100%; border: 1px solid var(--border-color); border-radius: 12px; opacity: 0; transition: opacity 0.5s ease; }
 
 /* --- Modal & Notifikasi --- */
 .modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }

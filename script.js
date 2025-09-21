@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const agentModeBtn = document.getElementById('agent-mode-btn');
     const livePreviewContainer = document.getElementById('live-preview-container');
     const livePreviewIframe = document.getElementById('live-preview-iframe');
+    const agentLogConsole = document.getElementById('agent-log-console');
 
     // --- State Aplikasi ---
     let allChats = {};
@@ -70,15 +71,25 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Speech Recognition Error:", event.error);
             isRecording = false;
             clearInterval(timerInterval);
-            if(voiceRecorderUI) voiceRecorderUI.style.display = 'none';
-            if(inputWrapper) inputWrapper.style.display = 'flex';
+            if (voiceRecorderUI) voiceRecorderUI.style.display = 'none';
+            if (inputWrapper) inputWrapper.style.display = 'flex';
         };
     } else {
-        if(voiceBtn) voiceBtn.disabled = true;
+        if (voiceBtn) voiceBtn.disabled = true;
         console.log("Speech Recognition tidak didukung di browser ini.");
     }
     const formatTime = (seconds) => { const minutes = Math.floor(seconds / 60); const secs = seconds % 60; return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`; };
-    const createVisualizerBars = () => { if(!waveformVisualizer) return; waveformVisualizer.innerHTML = ''; for (let i = 0; i < 20; i++) { const bar = document.createElement('div'); bar.className = 'waveform-bar'; bar.style.animationDelay = `${Math.random() * 0.5}s`; bar.style.animationDuration = `${0.8 + Math.random() * 0.7}s`; waveformVisualizer.appendChild(bar); } };
+    const createVisualizerBars = () => {
+        if (!waveformVisualizer) return;
+        waveformVisualizer.innerHTML = '';
+        for (let i = 0; i < 20; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'waveform-bar';
+            bar.style.animationDelay = `${Math.random() * 0.5}s`;
+            bar.style.animationDuration = `${0.8 + Math.random() * 0.7}s`;
+            waveformVisualizer.appendChild(bar);
+        }
+    };
 
     // --- Logika Tombol & Menu ---
     const toggleSidebar = () => body.classList.toggle("sidebar-open");
@@ -148,17 +159,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- Logika Agent Mode ---
-    if(agentModeBtn) agentModeBtn.addEventListener('click', () => {
+    if (agentModeBtn) agentModeBtn.addEventListener('click', () => {
         isAgentMode = !isAgentMode;
         body.classList.toggle('dark-mode');
         agentModeBtn.classList.toggle('active');
-
-        if(isAgentMode) {
+        if (isAgentMode) {
             chatInput.placeholder = 'Perintahkan saya untuk membuat sesuatu...';
-            welcomeScreen.style.display = 'none';
+            chatContainer.querySelectorAll('.message, .loading-indicator, .welcome-screen').forEach(el => el.style.display = 'none');
             livePreviewContainer.style.display = 'flex';
         } else {
             chatInput.placeholder = 'Ask me anything...';
+            chatContainer.querySelectorAll('.message, .loading-indicator, .welcome-screen').forEach(el => el.style.display = '');
             livePreviewContainer.style.display = 'none';
             if (!chatContainer.querySelector('.message')) {
                 welcomeScreen.style.display = 'block';
@@ -181,7 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
         clearAttachment();
         document.querySelectorAll('#history-container .nav-item').forEach(item => item.classList.remove('active'));
     }
-    
+
     // --- Logika Penanganan File ---
     if (fileInput) fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
@@ -197,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (filePopupMenu) filePopupMenu.classList.remove('active');
     });
     function displayAttachmentPreview(fileName, dataUrl) {
-        if(!attachmentPreview) return;
+        if (!attachmentPreview) return;
         attachmentPreview.innerHTML = `
             <div class="preview-item">
                 ${dataUrl.startsWith('data:image') ? `<img src="${dataUrl}" alt="Preview">` : ''}
@@ -215,6 +226,26 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Auto-resize Textarea ---
     if (chatInput) chatInput.addEventListener('input', () => { chatInput.style.height = 'auto'; chatInput.style.height = `${chatInput.scrollHeight}px`; });
 
+    // --- Logika Simulasi Agent ---
+    async function runAgentSimulation() {
+        const logLines = [
+            "<span class='tag'>[ Menganalisis ]</span> Menganalisis permintaan Anda...",
+            "<span class='tag'>[ Merancang ]</span> Merancang struktur dasar HTML...",
+            "<span class='tag'>[ Menulis CSS ]</span> Menulis kode CSS untuk styling visual...",
+            "<span class='tag'>[ Finalisasi ]</span> Merender kode dan menyelesaikan..."
+        ];
+        agentLogConsole.innerHTML = '';
+        agentLogConsole.style.display = 'flex';
+        livePreviewIframe.style.opacity = '0';
+        for (let i = 0; i < logLines.length; i++) {
+            await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 500));
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.innerHTML = logLines[i];
+            agentLogConsole.appendChild(line);
+        }
+    }
+
     // --- Fungsi Pengiriman Pesan ---
     const handleSendMessage = async () => {
         const prompt = chatInput.value.trim();
@@ -228,58 +259,84 @@ document.addEventListener("DOMContentLoaded", () => {
         const userParts = [];
         if (attachedFile) userParts.push({ inlineData: { mimeType: attachedFile.mimeType, data: attachedFile.base64 } });
         if (prompt) userParts.push({ text: prompt });
-        appendMessage('user', prompt, attachedFile ? `data:${attachedFile.mimeType};base64,${attachedFile.base64}` : null);
+        
+        if (!isAgentMode) {
+             appendMessage('user', prompt, attachedFile ? `data:${attachedFile.mimeType};base64,${attachedFile.base64}` : null);
+        }
         allChats[currentChatId].push({ role: 'user', parts: userParts });
+        
         chatInput.value = '';
         chatInput.style.height = 'auto';
         clearAttachment();
-        const loadingState = appendLoadingIndicator();
-        abortController = new AbortController();
-        generateBtn.classList.add('generating');
-        let seconds = 0;
-        const generationTimer = setInterval(() => {
-            seconds++;
-            if (generateBtn.querySelector('.stop-timer')) generateBtn.querySelector('.stop-timer').textContent = formatTime(seconds);
-        }, 1000);
-        generateBtn.onclick = () => {
-            abortController.abort();
-        };
-
-        try {
-            const response = await fetch('/api/generate', {
+        
+        if (isAgentMode) {
+            const simulationPromise = runAgentSimulation();
+            const fetchPromise = fetch('/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                signal: abortController.signal,
-                body: JSON.stringify({
-                    history: allChats[currentChatId],
-                    model: currentModel,
-                    mode: isAgentMode ? 'agent' : 'chat'
-                }),
+                body: JSON.stringify({ history: allChats[currentChatId], model: currentModel, mode: 'agent' }),
+            }).then(res => {
+                if (!res.ok) throw new Error(`Server error: ${res.statusText}`);
+                return res.json();
             });
-            if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
-            const result = await response.json();
-            clearInterval(loadingState.intervalId);
-            const loadingTextElement = loadingState.element.querySelector('.loading-text');
-            if (loadingTextElement) loadingTextElement.textContent = "Tentu, ini dia!";
-            setTimeout(() => {
-                loadingState.element.remove();
-                if (isAgentMode) {
+
+            try {
+                const [_, result] = await Promise.all([simulationPromise, fetchPromise]);
+                await new Promise(resolve => setTimeout(resolve, 500));
+                const line = document.createElement('div');
+                line.className = 'log-line';
+                line.innerHTML = "<span class='tag'>[ Selesai ]</span> Proses building selesai!";
+                agentLogConsole.appendChild(line);
+
+                setTimeout(() => {
+                    agentLogConsole.style.display = 'none';
                     livePreviewIframe.srcdoc = result.data;
-                    appendMessage('model', 'Tentu, proses building selesai. Berikut hasilnya.');
-                } else {
+                    livePreviewIframe.style.opacity = '1';
+                    allChats[currentChatId].push({ role: 'model', parts: [{ text: result.data }] });
+                }, 1000);
+            } catch (error) {
+                 console.error("Agent mode error:", error);
+                 agentLogConsole.innerHTML = `<div class='log-line'><span class='tag'>[ ERROR ]</span> Gagal mem-build, coba lagi.</div>`;
+            }
+
+        } else {
+            const loadingState = appendLoadingIndicator();
+            abortController = new AbortController();
+            generateBtn.classList.add('generating');
+            let seconds = 0;
+            const generationTimer = setInterval(() => {
+                seconds++;
+                if (generateBtn.querySelector('.stop-timer')) generateBtn.querySelector('.stop-timer').textContent = formatTime(seconds);
+            }, 1000);
+            generateBtn.onclick = () => { abortController.abort(); };
+
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    signal: abortController.signal,
+                    body: JSON.stringify({ history: allChats[currentChatId], model: currentModel, mode: 'chat' }),
+                });
+                if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
+                const result = await response.json();
+                clearInterval(loadingState.intervalId);
+                const loadingTextElement = loadingState.element.querySelector('.loading-text');
+                if (loadingTextElement) loadingTextElement.textContent = "Tentu, ini dia!";
+                setTimeout(() => {
+                    loadingState.element.remove();
                     appendMessage('model', result.data);
-                }
-                allChats[currentChatId].push({ role: 'model', parts: [{ text: result.data }] });
-            }, 700);
-        } catch (error) {
-            clearInterval(loadingState.intervalId);
-            loadingState.element.remove();
-            if (error.name === 'AbortError') { appendMessage('model', 'Respon dihentikan.'); } 
-            else { console.error("Error fetching AI response:", error); appendMessage('model', 'Maaf, terjadi kesalahan. 🤖'); }
-        } finally {
-            generateBtn.classList.remove('generating');
-            clearInterval(generationTimer);
-            generateBtn.onclick = handleSendMessage;
+                    allChats[currentChatId].push({ role: 'model', parts: [{ text: result.data }] });
+                }, 700);
+            } catch (error) {
+                clearInterval(loadingState.intervalId);
+                loadingState.element.remove();
+                if (error.name === 'AbortError') { appendMessage('model', 'Respon dihentikan.'); } 
+                else { console.error("Error fetching AI response:", error); appendMessage('model', 'Maaf, terjadi kesalahan. 🤖'); }
+            } finally {
+                generateBtn.classList.remove('generating');
+                clearInterval(generationTimer);
+                generateBtn.onclick = handleSendMessage;
+            }
         }
     };
 
@@ -369,5 +426,6 @@ document.addEventListener("DOMContentLoaded", () => {
             newChatBtn.classList.add('active');
         }
     }
+    
     function scrollToBottom() { if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; }
 });
