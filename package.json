@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "AI Chat Application",
   "main": "index.html",
+  "type": "module",
   "scripts": {
     "start": "echo \"No start script needed for static files, Vercel handles API routing.\" && exit 0"
   },

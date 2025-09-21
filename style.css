@@ -9,7 +9,6 @@
     --gradient-vip: linear-gradient(90deg, #F472B6, #D946EF);
 }
 
-/* --- DARK MODE BARU --- */
 body.dark-mode {
     --bg-main: #111827;
     --bg-sidebar: #1F2937;
@@ -69,18 +68,48 @@ body { font-family: var(--font-family); background-color: var(--bg-main); color:
 @property --angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 @keyframes rgb-border-flow { from { --angle: 0deg; } to { --angle: 360deg; } }
 .input-area-container { padding: 8px 16px 24px; flex-shrink: 0; }
-.input-wrapper { display: flex; align-items: flex-end; gap: 8px; position: relative; border-radius: 24px; background: var(--bg-main); padding: 8px; border: 2px solid var(--border-color); transition: border-color 0.3s ease, background-color 0.3s ease; }
+
+/* --- PERBAIKAN DESAIN INPUT AREA --- */
+.agent-mode-toggle-container {
+    display: flex;
+    justify-content: flex-start;
+    padding-bottom: 8px;
+}
+.agent-mode-btn {
+    padding: 8px 12px;
+    border: none;
+    background-color: var(--border-color);
+    color: var(--text-secondary);
+    border-radius: 50px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.agent-mode-btn.active {
+    background: linear-gradient(90deg, #6366F1, #A855F7);
+    color: white;
+    box-shadow: 0 4px 10px rgba(168, 85, 247, 0.4);
+}
+.input-wrapper { 
+    position: relative; 
+    border-radius: 24px; 
+    background: white; 
+    padding: 12px; /* Disederhanakan */
+    border: 2px solid var(--border-color); 
+    transition: border-color 0.3s ease; 
+    display: flex; /* DITAMBAHKAN */
+    flex-direction: column; /* DITAMBAHKAN */
+}
 .input-wrapper:focus-within {
     border-color: transparent;
     background: linear-gradient(var(--bg-main), var(--bg-main)) padding-box, conic-gradient(from var(--angle), #d8b4fe, #f472b6, #f87171, #facc15, #a3e635, #4ade80, #67e8f9, #a5b4fc, #d8b4fe) border-box;
     animation: rgb-border-flow 3s linear infinite;
 }
-.textarea-container { flex-grow: 1; position: relative; padding-left: 10px; }
+.textarea-container { position: relative; padding-left: 10px; }
 .textarea-container::before { content: '|'; position: absolute; left: 0; top: 0; color: #c084fc; animation: blink 1s step-end infinite; font-size: 1.2em; }
 textarea { width: 100%; border: none; outline: none; resize: none; background: transparent; font-family: var(--font-family); font-size: 16px; line-height: 1.5; max-height: 120px; color: var(--text-primary); }
 textarea::placeholder { color: var(--text-secondary); }
-.input-actions { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 8px; flex-shrink: 0; }
-.input-actions { align-self: flex-end; }
+.input-actions { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 8px; }
 .action-btn { display: flex; align-items: center; justify-content: center; background-color: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: background-color 0.2s ease; }
 .dark-mode .action-btn:hover { background-color: #374151; }
 .generate-btn { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border: none; background: var(--text-primary); color: var(--bg-main); border-radius: 50px; font-weight: 500; cursor: pointer; transition: background-color 0.2s ease; }
@@ -91,39 +120,9 @@ textarea::placeholder { color: var(--text-secondary); }
 .generate-btn.generating .stop-text, .generate-btn.generating .stop-timer { display: inline; }
 .generate-btn.generating { background-color: #DC2626; }
 
-/* --- TOMBOL AGENT MODE BARU --- */
-.agent-mode-btn {
-    padding: 8px 12px;
-    border: none;
-    background-color: var(--border-color);
-    color: var(--text-secondary);
-    border-radius: 50px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-    margin-bottom: 4px; /* Agar sejajar dengan textarea */
-}
-.agent-mode-btn.active {
-    background: linear-gradient(90deg, #6366F1, #A855F7);
-    color: white;
-    box-shadow: 0 4px 10px rgba(168, 85, 247, 0.4);
-}
-
 /* --- LIVE PREVIEW CONTAINER BARU --- */
-.live-preview-container {
-    display: none; /* Tersembunyi secara default */
-    flex-grow: 1;
-    width: 100%;
-    padding: 0;
-    margin-bottom: 16px;
-}
-.live-preview-container iframe {
-    width: 100%;
-    height: 100%;
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-}
+.live-preview-container { display: none; flex-grow: 1; width: 100%; padding: 0; margin-bottom: 16px; }
+.live-preview-container iframe { width: 100%; height: 100%; border: 1px solid var(--border-color); border-radius: 12px; }
 
 /* --- Modal & Notifikasi --- */
 .modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }

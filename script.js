@@ -70,25 +70,15 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Speech Recognition Error:", event.error);
             isRecording = false;
             clearInterval(timerInterval);
-            if (voiceRecorderUI) voiceRecorderUI.style.display = 'none';
-            if (inputWrapper) inputWrapper.style.display = 'block';
+            if(voiceRecorderUI) voiceRecorderUI.style.display = 'none';
+            if(inputWrapper) inputWrapper.style.display = 'flex';
         };
     } else {
-        if (voiceBtn) voiceBtn.disabled = true;
+        if(voiceBtn) voiceBtn.disabled = true;
         console.log("Speech Recognition tidak didukung di browser ini.");
     }
     const formatTime = (seconds) => { const minutes = Math.floor(seconds / 60); const secs = seconds % 60; return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`; };
-    const createVisualizerBars = () => {
-        if (!waveformVisualizer) return;
-        waveformVisualizer.innerHTML = '';
-        for (let i = 0; i < 20; i++) {
-            const bar = document.createElement('div');
-            bar.className = 'waveform-bar';
-            bar.style.animationDelay = `${Math.random() * 0.5}s`;
-            bar.style.animationDuration = `${0.8 + Math.random() * 0.7}s`;
-            waveformVisualizer.appendChild(bar);
-        }
-    };
+    const createVisualizerBars = () => { if(!waveformVisualizer) return; waveformVisualizer.innerHTML = ''; for (let i = 0; i < 20; i++) { const bar = document.createElement('div'); bar.className = 'waveform-bar'; bar.style.animationDelay = `${Math.random() * 0.5}s`; bar.style.animationDuration = `${0.8 + Math.random() * 0.7}s`; waveformVisualizer.appendChild(bar); } };
 
     // --- Logika Tombol & Menu ---
     const toggleSidebar = () => body.classList.toggle("sidebar-open");
@@ -125,11 +115,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (deleteVoiceBtn) deleteVoiceBtn.addEventListener('click', () => {
         chatInput.value = '';
         voiceRecorderUI.style.display = 'none';
-        inputWrapper.style.display = 'block';
+        inputWrapper.style.display = 'flex';
     });
     if (sendVoiceBtn) sendVoiceBtn.addEventListener('click', () => {
         voiceRecorderUI.style.display = 'none';
-        inputWrapper.style.display = 'block';
+        inputWrapper.style.display = 'flex';
         handleSendMessage();
     });
     if (modelSelectorBtn) modelSelectorBtn.addEventListener('click', (e) => {
@@ -184,7 +174,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (body.classList.contains("sidebar-open")) toggleSidebar();
         newChatBtn.classList.add('active');
     });
-
     function clearChatScreen() {
         const messages = chatContainer.querySelectorAll('.message, .loading-indicator');
         messages.forEach(msg => msg.remove());
@@ -192,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
         clearAttachment();
         document.querySelectorAll('#history-container .nav-item').forEach(item => item.classList.remove('active'));
     }
-
+    
     // --- Logika Penanganan File ---
     if (fileInput) fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
@@ -207,9 +196,8 @@ document.addEventListener("DOMContentLoaded", () => {
         reader.readAsDataURL(file);
         if (filePopupMenu) filePopupMenu.classList.remove('active');
     });
-
     function displayAttachmentPreview(fileName, dataUrl) {
-        if (!attachmentPreview) return;
+        if(!attachmentPreview) return;
         attachmentPreview.innerHTML = `
             <div class="preview-item">
                 ${dataUrl.startsWith('data:image') ? `<img src="${dataUrl}" alt="Preview">` : ''}
@@ -218,7 +206,6 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>`;
         document.getElementById('remove-attachment-btn').addEventListener('click', clearAttachment);
     }
-
     function clearAttachment() {
         attachedFile = null;
         if (fileInput) fileInput.value = '';
@@ -233,25 +220,20 @@ document.addEventListener("DOMContentLoaded", () => {
         const prompt = chatInput.value.trim();
         if (!prompt && !attachedFile) return;
         if (welcomeScreen) welcomeScreen.style.display = 'none';
-
         if (!currentChatId) {
             currentChatId = `chat_${Date.now()}`;
             allChats[currentChatId] = [];
             createHistoryItem(currentChatId, prompt || "Chat with attachment");
         }
-
         const userParts = [];
         if (attachedFile) userParts.push({ inlineData: { mimeType: attachedFile.mimeType, data: attachedFile.base64 } });
         if (prompt) userParts.push({ text: prompt });
-
         appendMessage('user', prompt, attachedFile ? `data:${attachedFile.mimeType};base64,${attachedFile.base64}` : null);
         allChats[currentChatId].push({ role: 'user', parts: userParts });
-
         chatInput.value = '';
         chatInput.style.height = 'auto';
         clearAttachment();
         const loadingState = appendLoadingIndicator();
-
         abortController = new AbortController();
         generateBtn.classList.add('generating');
         let seconds = 0;
@@ -259,7 +241,6 @@ document.addEventListener("DOMContentLoaded", () => {
             seconds++;
             if (generateBtn.querySelector('.stop-timer')) generateBtn.querySelector('.stop-timer').textContent = formatTime(seconds);
         }, 1000);
-
         generateBtn.onclick = () => {
             abortController.abort();
         };
@@ -277,11 +258,9 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
             const result = await response.json();
-
             clearInterval(loadingState.intervalId);
             const loadingTextElement = loadingState.element.querySelector('.loading-text');
             if (loadingTextElement) loadingTextElement.textContent = "Tentu, ini dia!";
-            
             setTimeout(() => {
                 loadingState.element.remove();
                 if (isAgentMode) {
@@ -292,16 +271,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 allChats[currentChatId].push({ role: 'model', parts: [{ text: result.data }] });
             }, 700);
-
         } catch (error) {
             clearInterval(loadingState.intervalId);
             loadingState.element.remove();
-            if (error.name === 'AbortError') {
-                appendMessage('model', 'Respon dihentikan.');
-            } else {
-                console.error("Error fetching AI response:", error);
-                appendMessage('model', 'Maaf, terjadi kesalahan. 🤖');
-            }
+            if (error.name === 'AbortError') { appendMessage('model', 'Respon dihentikan.'); } 
+            else { console.error("Error fetching AI response:", error); appendMessage('model', 'Maaf, terjadi kesalahan. 🤖'); }
         } finally {
             generateBtn.classList.remove('generating');
             clearInterval(generationTimer);
@@ -370,7 +344,6 @@ document.addEventListener("DOMContentLoaded", () => {
         historyContainer.prepend(historyItem);
         setActiveHistoryItem(chatId);
     }
-
     function loadChatHistory(chatId) {
         if (!allChats[chatId]) return;
         currentChatId = chatId;
@@ -385,14 +358,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         setActiveHistoryItem(chatId);
     }
-
     function setActiveHistoryItem(chatId) {
         document.querySelectorAll('#history-container .nav-item').forEach(item => {
-            if (item.dataset.chatId === chatId) {
-                item.classList.add('active');
-            } else {
-                item.classList.remove('active');
-            }
+            if (item.dataset.chatId === chatId) item.classList.add('active');
+            else item.classList.remove('active');
         });
         if (chatId) {
             newChatBtn.classList.remove('active');
@@ -400,6 +369,5 @@ document.addEventListener("DOMContentLoaded", () => {
             newChatBtn.classList.add('active');
         }
     }
-
     function scrollToBottom() { if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; }
 });
