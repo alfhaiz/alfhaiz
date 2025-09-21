@@ -16,40 +16,132 @@ document.addEventListener("DOMContentLoaded", () => {
     const attachCameraBtn = document.getElementById('attach-camera-btn');
     const fileInput = document.getElementById('file-input');
     const attachmentPreview = document.getElementById("attachment-preview");
+    const voiceRecorderUI = document.getElementById('voice-recorder-ui');
+    const recorderTimer = document.getElementById('recorder-timer');
+    const waveformVisualizer = document.getElementById('waveform-visualizer');
+    const recorderActions = document.querySelector('.recorder-actions');
+    const recorderStatus = document.querySelector('.recorder-status');
+    const deleteVoiceBtn = document.getElementById('delete-voice-btn');
+    const sendVoiceBtn = document.getElementById('send-voice-btn');
+    const inputWrapper = document.getElementById('input-wrapper');
 
-    // --- Variabel State Aplikasi ---
+    // --- State Aplikasi ---
     let conversationHistory = [];
     let attachedFile = null;
+    let isRecording = false;
+    let recognition;
+    let timerInterval;
+    let abortController;
 
-    // --- Sidebar & Menu ---
-    const toggleSidebar = () => body.classList.toggle("sidebar-open");
-    menuToggleBtn.addEventListener("click", toggleSidebar);
-    sidebarOverlay.addEventListener("click", toggleSidebar);
-    voiceBtn.addEventListener('click', () => alert('Fungsi Voice akan segera hadir!'));
+    // --- Inisialisasi Speech Recognition ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'id-ID';
 
-    // --- Logika Menu Popup File BARU ---
-    moreOptionsBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        filePopupMenu.classList.toggle('active');
-    });
-    window.addEventListener("click", () => {
-        filePopupMenu.classList.remove('active');
-    });
+        recognition.onresult = (event) => {
+            let interimTranscript = '';
+            let finalTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
+            }
+            chatInput.value = finalTranscript + interimTranscript;
+        };
+
+        recognition.onend = () => {
+            isRecording = false;
+            clearInterval(timerInterval);
+            if (recorderStatus) recorderStatus.style.display = 'none';
+            if (recorderActions) recorderActions.style.display = 'flex';
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Speech Recognition Error:", event.error);
+            isRecording = false;
+            clearInterval(timerInterval);
+            voiceRecorderUI.style.display = 'none';
+            inputWrapper.style.display = 'block';
+        };
+
+    } else {
+        if(voiceBtn) voiceBtn.disabled = true;
+        console.log("Speech Recognition tidak didukung di browser ini.");
+    }
     
-    // --- Fungsionalitas Tombol Popup ---
-    attachFileBtn.addEventListener('click', () => {
-        fileInput.removeAttribute('capture');
-        fileInput.setAttribute('accept', '*/*'); // Terima semua jenis file
-        fileInput.click();
+    // --- Helper Functions ---
+    const formatTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const createVisualizerBars = () => {
+        waveformVisualizer.innerHTML = '';
+        for (let i = 0; i < 20; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'waveform-bar';
+            bar.style.animationDelay = `${Math.random() * 0.5}s`;
+            bar.style.animationDuration = `${0.8 + Math.random() * 0.7}s`;
+            waveformVisualizer.appendChild(bar);
+        }
+    };
+
+    // --- Logika Tombol & Menu ---
+    const toggleSidebar = () => body.classList.toggle("sidebar-open");
+    if(menuToggleBtn) menuToggleBtn.addEventListener("click", toggleSidebar);
+    if(sidebarOverlay) sidebarOverlay.addEventListener("click", toggleSidebar);
+    
+    if(moreOptionsBtn) moreOptionsBtn.addEventListener('click', (e) => { e.stopPropagation(); filePopupMenu.classList.toggle('active'); });
+    window.addEventListener("click", () => {
+        if(filePopupMenu) filePopupMenu.classList.remove('active');
     });
-    attachCameraBtn.addEventListener('click', () => {
-        fileInput.setAttribute('capture', 'environment');
-        fileInput.setAttribute('accept', 'image/*'); // Hanya terima gambar dari kamera
-        fileInput.click();
+
+    if(attachFileBtn) attachFileBtn.addEventListener('click', () => { fileInput.removeAttribute('capture'); fileInput.setAttribute('accept', '*/*'); fileInput.click(); });
+    if(attachCameraBtn) attachCameraBtn.addEventListener('click', () => { fileInput.setAttribute('capture', 'environment'); fileInput.setAttribute('accept', 'image/*'); fileInput.click(); });
+    
+    // --- Logika Perekaman Suara ---
+    if(voiceBtn) voiceBtn.addEventListener('click', () => {
+        if (!recognition) return;
+        if (isRecording) {
+            recognition.stop();
+        } else {
+            isRecording = true;
+            chatInput.value = '';
+            recognition.start();
+            voiceRecorderUI.style.display = 'flex';
+            inputWrapper.style.display = 'none';
+            recorderStatus.style.display = 'flex';
+            recorderActions.style.display = 'none';
+            createVisualizerBars();
+            let seconds = 0;
+            recorderTimer.textContent = '00:00';
+            timerInterval = setInterval(() => {
+                seconds++;
+                recorderTimer.textContent = formatTime(seconds);
+            }, 1000);
+        }
+    });
+
+    if(deleteVoiceBtn) deleteVoiceBtn.addEventListener('click', () => {
+        chatInput.value = '';
+        voiceRecorderUI.style.display = 'none';
+        inputWrapper.style.display = 'block';
+    });
+
+    if(sendVoiceBtn) sendVoiceBtn.addEventListener('click', () => {
+        voiceRecorderUI.style.display = 'none';
+        inputWrapper.style.display = 'block';
+        handleSendMessage();
     });
 
     // --- Fungsi "New Chat" ---
-    newChatBtn.addEventListener("click", (e) => {
+    if(newChatBtn) newChatBtn.addEventListener("click", (e) => {
         e.preventDefault();
         const messages = chatContainer.querySelectorAll('.message, .loading-indicator');
         messages.forEach(msg => msg.remove());
@@ -61,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // --- Logika Penanganan File ---
-    fileInput.addEventListener('change', (event) => {
+    if(fileInput) fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (!file) return;
         const reader = new FileReader();
@@ -72,10 +164,11 @@ document.addEventListener("DOMContentLoaded", () => {
             displayAttachmentPreview(file.name, dataUrl);
         };
         reader.readAsDataURL(file);
-        filePopupMenu.classList.remove('active');
+        if(filePopupMenu) filePopupMenu.classList.remove('active');
     });
 
     function displayAttachmentPreview(fileName, dataUrl) {
+        if(!attachmentPreview) return;
         attachmentPreview.innerHTML = `
             <div class="preview-item">
                 ${dataUrl.startsWith('data:image') ? `<img src="${dataUrl}" alt="Preview">` : ''}
@@ -87,12 +180,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function clearAttachment() {
         attachedFile = null;
-        fileInput.value = '';
-        attachmentPreview.innerHTML = '';
+        if(fileInput) fileInput.value = '';
+        if(attachmentPreview) attachmentPreview.innerHTML = '';
     }
 
     // --- Auto-resize Textarea ---
-    chatInput.addEventListener('input', () => { chatInput.style.height = 'auto'; chatInput.style.height = `${chatInput.scrollHeight}px`; });
+    if(chatInput) chatInput.addEventListener('input', () => { chatInput.style.height = 'auto'; chatInput.style.height = `${chatInput.scrollHeight}px`; });
 
     // --- Fungsi Pengiriman Pesan ---
     const handleSendMessage = async () => {
@@ -103,12 +196,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (conversationHistory.length === 0 && prompt) { createHistoryItem(prompt); }
         
         const userParts = [];
-        if (attachedFile) {
-            userParts.push({ inlineData: { mimeType: attachedFile.mimeType, data: attachedFile.base64 } });
-        }
-        if (prompt) {
-            userParts.push({ text: prompt });
-        }
+        if (attachedFile) userParts.push({ inlineData: { mimeType: attachedFile.mimeType, data: attachedFile.base64 } });
+        if (prompt) userParts.push({ text: prompt });
 
         appendMessage('user', prompt, attachedFile ? `data:${attachedFile.mimeType};base64,${attachedFile.base64}` : null);
         conversationHistory.push({ role: 'user', parts: userParts });
@@ -118,10 +207,28 @@ document.addEventListener("DOMContentLoaded", () => {
         clearAttachment();
         const loadingIndicator = appendLoadingIndicator();
 
+        abortController = new AbortController();
+        generateBtn.classList.add('generating');
+        let seconds = 0;
+        const generationTimer = setInterval(() => {
+            seconds++;
+            if(generateBtn.querySelector('.stop-timer')) {
+                generateBtn.querySelector('.stop-timer').textContent = formatTime(seconds);
+            }
+        }, 1000);
+        
+        generateBtn.onclick = () => {
+            abortController.abort();
+            generateBtn.classList.remove('generating');
+            clearInterval(generationTimer);
+            generateBtn.onclick = handleSendMessage;
+        };
+
         try {
             const response = await fetch('/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                signal: abortController.signal,
                 body: JSON.stringify({ history: conversationHistory }),
             });
             if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
@@ -131,22 +238,31 @@ document.addEventListener("DOMContentLoaded", () => {
             appendMessage('model', result.data);
             conversationHistory.push({ role: 'model', parts: [{ text: result.data }] });
         } catch (error) {
-            console.error("Error fetching AI response:", error);
-            loadingIndicator.remove();
-            appendMessage('model', 'Maaf, terjadi kesalahan. 🤖 Mari kita coba lagi.');
+            if (error.name === 'AbortError') {
+                console.log('Fetch aborted by user.');
+                loadingIndicator.remove();
+                appendMessage('model', 'Respon dihentikan. Ada lagi yang bisa dibantu?');
+            } else {
+                console.error("Error fetching AI response:", error);
+                loadingIndicator.remove();
+                appendMessage('model', 'Maaf, terjadi kesalahan. 🤖 Mari kita coba lagi.');
+            }
+        } finally {
+            generateBtn.classList.remove('generating');
+            clearInterval(generationTimer);
+            generateBtn.onclick = handleSendMessage;
         }
     };
 
     // --- Event Listener Kirim ---
-    generateBtn.addEventListener("click", handleSendMessage);
-    chatInput.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } });
+    if(generateBtn) generateBtn.onclick = handleSendMessage;
+    if(chatInput) chatInput.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } });
 
-    // --- Fungsi Tampilan Pesan (DIPERBARUI) ---
+    // --- Fungsi Tampilan Pesan ---
     function appendMessage(role, text, imageUrl = null) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${role === 'user' ? 'user' : 'ai'}`;
         
-        // Untuk pesan user, gambar muncul di atas teks
         if (imageUrl) {
             const img = document.createElement('img');
             img.src = imageUrl;
@@ -162,8 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
              }
              messageDiv.appendChild(p);
         }
-        
-        chatContainer.appendChild(messageDiv);
+        if(chatContainer) chatContainer.appendChild(messageDiv);
         scrollToBottom();
     }
 
@@ -172,12 +287,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const loadingDiv = document.createElement('div');
         loadingDiv.className = 'loading-indicator';
         loadingDiv.innerHTML = `<div class="spinner"></div>`;
-        chatContainer.appendChild(loadingDiv);
+        if(chatContainer) chatContainer.appendChild(loadingDiv);
         scrollToBottom();
         return loadingDiv;
     }
     
     function createHistoryItem(prompt) {
+        if(!historyContainer) return;
         document.querySelectorAll('#history-container .nav-item').forEach(item => item.classList.remove('active'));
         const historyItem = document.createElement('a');
         historyItem.href = '#';
@@ -187,6 +303,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     
     function scrollToBottom() {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 });
