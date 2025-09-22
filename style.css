@@ -59,6 +59,33 @@ body { font-family: var(--font-family); background-color: var(--bg-main); color:
 .message.ai { align-self: flex-start; animation: smoothFadeInUp 0.7s ease-out forwards; }
 .message.user { align-self: flex-end; display: flex; flex-direction: column; align-items: flex-end; }
 .message img { max-width: 100%; border-radius: 8px; margin-bottom: 8px; }
+.message .source-links {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border-color);
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+.message .source-links p {
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+.message .source-links ul {
+    list-style: none;
+    padding-left: 0;
+}
+.message .source-links li {
+    margin-bottom: 4px;
+}
+.message .source-links a {
+    color: var(--accent-color);
+    text-decoration: none;
+    word-break: break-all;
+}
+.message .source-links a:hover {
+    text-decoration: underline;
+}
+
 .loading-indicator { align-self: flex-start; display: flex; align-items: center; gap: 12px; padding: 10px 0; }
 .gemini-loader { position: relative; width: 24px; height: 24px; animation: spin 2s linear infinite; }
 .gemini-loader::before, .gemini-loader::after { content: ''; position: absolute; top: 50%; left: 50%; width: 100%; height: 2px; background: conic-gradient(from var(--angle), #d8b4fe, #f472b6, #f87171, #facc15, #a3e635, #4ade80, #67e8f9, #a5b4fc, #d8b4fe); animation: rgb-border-flow 3s linear infinite; transform-origin: center; }
@@ -68,9 +95,6 @@ body { font-family: var(--font-family); background-color: var(--bg-main); color:
 @property --angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 @keyframes rgb-border-flow { from { --angle: 0deg; } to { --angle: 360deg; } }
 .input-area-container { padding: 8px 16px 24px; flex-shrink: 0; }
-.agent-mode-toggle-container { display: flex; justify-content: flex-start; padding-bottom: 8px; }
-.agent-mode-btn { padding: 8px 12px; border: none; background-color: var(--border-color); color: var(--text-secondary); border-radius: 50px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; }
-.agent-mode-btn.active { background: linear-gradient(90deg, #6366F1, #A855F7); color: white; box-shadow: 0 4px 10px rgba(168, 85, 247, 0.4); }
 .input-wrapper { display: flex; flex-direction: column; position: relative; border-radius: 24px; background: var(--bg-main); padding: 12px; border: 2px solid var(--border-color); transition: border-color 0.3s ease, background-color 0.3s ease; }
 .input-wrapper:focus-within {
     border-color: transparent;
@@ -91,14 +115,6 @@ textarea::placeholder { color: var(--text-secondary); }
 .generate-btn.generating .generate-text, .generate-btn.generating .generate-icon { display: none; }
 .generate-btn.generating .stop-text, .generate-btn.generating .stop-timer { display: inline; }
 .generate-btn.generating { background-color: #DC2626; }
-
-/* --- LIVE PREVIEW & LOG CONSOLE BARU --- */
-.live-preview-container { display: none; flex-grow: 1; width: 100%; padding: 0; margin-bottom: 16px; position: relative; }
-.agent-log-console { position: absolute; inset: 0; background-color: #1F2937; color: #F9FAFB; border-radius: 12px; padding: 24px; font-family: 'Courier New', Courier, monospace; overflow-y: auto; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-.log-line { opacity: 0; animation: log-line-appear 0.8s ease-out forwards; margin-bottom: 12px; font-size: 14px; }
-@keyframes log-line-appear { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-.log-line .tag { color: #A78BFA; font-weight: bold; }
-.live-preview-container iframe { width: 100%; height: 100%; border: 1px solid var(--border-color); border-radius: 12px; opacity: 0; transition: opacity 0.5s ease; }
 
 /* --- Modal & Notifikasi --- */
 .modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }

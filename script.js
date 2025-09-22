@@ -29,17 +29,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const modelOptions = document.querySelectorAll('.model-option');
     const modelDisplayName = document.getElementById('model-display-name');
     const notificationToast = document.getElementById('notification-toast');
-    const agentModeBtn = document.getElementById('agent-mode-btn');
-    const livePreviewContainer = document.getElementById('live-preview-container');
-    const livePreviewIframe = document.getElementById('live-preview-iframe');
-    const agentLogConsole = document.getElementById('agent-log-console');
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const darkModeIcon = document.getElementById('dark-mode-icon');
 
     // --- State Aplikasi ---
     let allChats = {};
     let currentChatId = null;
-    let currentModel = 'gemini-2.0-flash';
+    // Menggunakan model Gemini terbaru
+    let currentModel = 'gemini-1.5-pro-latest'; 
     let attachedFile = null;
-    let isAgentMode = false;
     let isRecording = false;
     let recognition;
     let timerInterval;
@@ -55,11 +53,17 @@ document.addEventListener("DOMContentLoaded", () => {
         recognition.onresult = (event) => {
             let interimTranscript = '';
             let finalTranscript = '';
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
-                else interimTranscript += event.results[i][0].transcript;
+            for (let i = event.results.length - 1; i >= event.resultIndex; --i) {
+                 if (event.results[i].isFinal) finalTranscript = event.results[i][0].transcript + finalTranscript;
+                 else interimTranscript = event.results[i][0].transcript + interimTranscript;
             }
+            // Update input value with combined transcript
             chatInput.value = finalTranscript + interimTranscript;
+            // Optionally, if you want to immediately send when final is detected
+            // if (finalTranscript) {
+            //     // You might want to debounce this or add a confirmation
+            //     // handleSendMessage(); 
+            // }
         };
         recognition.onend = () => {
             isRecording = false;
@@ -73,10 +77,12 @@ document.addEventListener("DOMContentLoaded", () => {
             clearInterval(timerInterval);
             if (voiceRecorderUI) voiceRecorderUI.style.display = 'none';
             if (inputWrapper) inputWrapper.style.display = 'flex';
+            showNotification(`Error Rekaman Suara: ${event.error}.`);
         };
     } else {
         if (voiceBtn) voiceBtn.disabled = true;
-        console.log("Speech Recognition tidak didukung di browser ini.");
+        console.warn("Speech Recognition tidak didukung di browser ini.");
+        showNotification("Rekaman Suara tidak didukung di browser ini. 🎤");
     }
     const formatTime = (seconds) => { const minutes = Math.floor(seconds / 60); const secs = seconds % 60; return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`; };
     const createVisualizerBars = () => {
@@ -91,6 +97,36 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    // --- Logika Dark Mode ---
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    if (currentTheme === 'dark') {
+        body.classList.add('dark-mode');
+        if (darkModeIcon) {
+            darkModeIcon.setAttribute('d', 'M12 2.75a9.25 9.25 0 100 18.5 9.25 9.25 0 000-18.5zM12 4.25a7.75 7.75 0 100 15.5 7.75 7.75 0 000-15.5zM12 6a6 6 0 00-6 6h12a6 6 0 00-6-6z');
+        }
+    } else {
+        if (darkModeIcon) {
+            darkModeIcon.setAttribute('d', 'M12 2a1 1 0 011 1v2a1 1 0 11-2 0V3a1 1 0 011-1zm0 18a1 1 0 01-1 1v2a1 1 0 112 0v-2a1 1 0 01-1-1zm6.36-14.86a1 1 0 01-.71-.29l-1.41-1.41a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zm-12.72 12.72a1 1 0 01-.71-.29l-1.41-1.41a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zm-2.83-8.48a1 1 0 01-.71-.29L3.51 9.07a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zm12.72 12.72a1 1 0 01-.71-.29l-1.41-1.41a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6z');
+        }
+    }
+
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            if (body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+                if (darkModeIcon) {
+                    darkModeIcon.setAttribute('d', 'M12 2.75a9.25 9.25 0 100 18.5 9.25 9.25 0 000-18.5zM12 4.25a7.75 7.75 0 100 15.5 7.75 7.75 0 000-15.5zM12 6a6 6 0 00-6 6h12a6 6 0 00-6-6z');
+                }
+            } else {
+                localStorage.setItem('theme', 'light');
+                if (darkModeIcon) {
+                    darkModeIcon.setAttribute('d', 'M12 2a1 1 0 011 1v2a1 1 0 11-2 0V3a1 1 0 011-1zm0 18a1 1 0 01-1 1v2a1 1 0 112 0v-2a1 1 0 01-1-1zm6.36-14.86a1 1 0 01-.71-.29l-1.41-1.41a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zm-12.72 12.72a1 1 0 01-.71-.29l-1.41-1.41a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zm-2.83-8.48a1 1 0 01-.71-.29L3.51 9.07a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zm12.72 12.72a1 1 0 01-.71-.29l-1.41-1.41a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6z');
+                }
+            }
+        });
+    }
+
     // --- Logika Tombol & Menu ---
     const toggleSidebar = () => body.classList.toggle("sidebar-open");
     if (menuToggleBtn) menuToggleBtn.addEventListener("click", toggleSidebar);
@@ -103,7 +139,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (attachFileBtn) attachFileBtn.addEventListener('click', () => { fileInput.removeAttribute('capture'); fileInput.setAttribute('accept', '*/*'); fileInput.click(); });
     if (attachCameraBtn) attachCameraBtn.addEventListener('click', () => { fileInput.setAttribute('capture', 'environment'); fileInput.setAttribute('accept', 'image/*'); fileInput.click(); });
     if (voiceBtn) voiceBtn.addEventListener('click', () => {
-        if (!recognition) return;
+        if (!recognition) {
+            showNotification("Browser Anda tidak mendukung Rekaman Suara. 🎤");
+            return;
+        }
         if (isRecording) {
             recognition.stop();
         } else {
@@ -127,10 +166,12 @@ document.addEventListener("DOMContentLoaded", () => {
         chatInput.value = '';
         voiceRecorderUI.style.display = 'none';
         inputWrapper.style.display = 'flex';
+        if(isRecording) recognition.stop(); // Stop recognition if still running
     });
     if (sendVoiceBtn) sendVoiceBtn.addEventListener('click', () => {
         voiceRecorderUI.style.display = 'none';
         inputWrapper.style.display = 'flex';
+        if(isRecording) recognition.stop(); // Stop recognition before sending
         handleSendMessage();
     });
     if (modelSelectorBtn) modelSelectorBtn.addEventListener('click', (e) => {
@@ -145,37 +186,17 @@ document.addEventListener("DOMContentLoaded", () => {
             modelOptions.forEach(opt => opt.classList.remove('selected'));
             option.classList.add('selected');
             modelModal.classList.remove('active');
-            if (displayName.includes('3.5')) {
-                showNotification(`${displayName.toUpperCase()} READY`);
-            }
+            showNotification(`${displayName.toUpperCase()} READY`);
         });
     });
-    function showNotification(message) {
+    function showNotification(message, isError = false) {
         notificationToast.textContent = message;
+        notificationToast.style.backgroundColor = isError ? '#EF4444' : 'var(--text-primary)';
         notificationToast.classList.add('show');
         setTimeout(() => {
             notificationToast.classList.remove('show');
         }, 3000);
     }
-
-    // --- Logika Agent Mode ---
-    if (agentModeBtn) agentModeBtn.addEventListener('click', () => {
-        isAgentMode = !isAgentMode;
-        body.classList.toggle('dark-mode');
-        agentModeBtn.classList.toggle('active');
-        if (isAgentMode) {
-            chatInput.placeholder = 'Perintahkan saya untuk membuat sesuatu...';
-            chatContainer.querySelectorAll('.message, .loading-indicator, .welcome-screen').forEach(el => el.style.display = 'none');
-            livePreviewContainer.style.display = 'flex';
-        } else {
-            chatInput.placeholder = 'Ask me anything...';
-            chatContainer.querySelectorAll('.message, .loading-indicator, .welcome-screen').forEach(el => el.style.display = '');
-            livePreviewContainer.style.display = 'none';
-            if (!chatContainer.querySelector('.message')) {
-                welcomeScreen.style.display = 'block';
-            }
-        }
-    });
 
     // --- Logika Sistem History Chat ---
     if (newChatBtn) newChatBtn.addEventListener("click", (e) => {
@@ -197,6 +218,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (fileInput) fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (!file) return;
+
+        // Batasan ukuran file (misalnya 5MB)
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+        if (file.size > MAX_FILE_SIZE) {
+            showNotification("Ukuran file maksimal adalah 5MB. 🚫", true);
+            fileInput.value = ''; // Reset input
+            return;
+        }
+
         const reader = new FileReader();
         reader.onloadend = () => {
             const dataUrl = reader.result;
@@ -226,143 +256,126 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Auto-resize Textarea ---
     if (chatInput) chatInput.addEventListener('input', () => { chatInput.style.height = 'auto'; chatInput.style.height = `${chatInput.scrollHeight}px`; });
 
-    // --- Logika Simulasi Agent ---
-    async function runAgentSimulation() {
-        const logLines = [
-            "<span class='tag'>[ Menganalisis ]</span> Menganalisis permintaan Anda...",
-            "<span class='tag'>[ Merancang ]</span> Merancang struktur dasar HTML...",
-            "<span class='tag'>[ Menulis CSS ]</span> Menulis kode CSS untuk styling visual...",
-            "<span class='tag'>[ Finalisasi ]</span> Merender kode dan menyelesaikan..."
-        ];
-        agentLogConsole.innerHTML = '';
-        agentLogConsole.style.display = 'flex';
-        livePreviewIframe.style.opacity = '0';
-        for (let i = 0; i < logLines.length; i++) {
-            await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 500));
-            const line = document.createElement('div');
-            line.className = 'log-line';
-            line.innerHTML = logLines[i];
-            agentLogConsole.appendChild(line);
-        }
-    }
-
     // --- Fungsi Pengiriman Pesan ---
     const handleSendMessage = async () => {
         const prompt = chatInput.value.trim();
         if (!prompt && !attachedFile) return;
         if (welcomeScreen) welcomeScreen.style.display = 'none';
-        if (!currentChatId) {
+
+        // Jika chat baru atau ID chat kosong, buat yang baru
+        if (!currentChatId || !allChats[currentChatId]) {
             currentChatId = `chat_${Date.now()}`;
             allChats[currentChatId] = [];
-            createHistoryItem(currentChatId, prompt || "Chat with attachment");
+            createHistoryItem(currentChatId, prompt || "Chat dengan lampiran");
         }
+        
         const userParts = [];
         if (attachedFile) userParts.push({ inlineData: { mimeType: attachedFile.mimeType, data: attachedFile.base64 } });
         if (prompt) userParts.push({ text: prompt });
         
-        if (!isAgentMode) {
-             appendMessage('user', prompt, attachedFile ? `data:${attachedFile.mimeType};base64,${attachedFile.base64}` : null);
-        }
+        appendMessage('user', prompt, attachedFile ? `data:${attachedFile.mimeType};base64,${attachedFile.base64}` : null);
+        // Simpan pesan pengguna ke riwayat chat
         allChats[currentChatId].push({ role: 'user', parts: userParts });
         
         chatInput.value = '';
         chatInput.style.height = 'auto';
         clearAttachment();
         
-        if (isAgentMode) {
-            const simulationPromise = runAgentSimulation();
-            const fetchPromise = fetch('/api/generate', {
+        const loadingState = appendLoadingIndicator();
+        abortController = new AbortController();
+        generateBtn.classList.add('generating');
+        let seconds = 0;
+        const generationTimer = setInterval(() => {
+            seconds++;
+            if (generateBtn.querySelector('.stop-timer')) generateBtn.querySelector('.stop-timer').textContent = formatTime(seconds);
+        }, 1000);
+        // Tombol stop akan memanggil abortController.abort()
+        generateBtn.onclick = () => { 
+            abortController.abort();
+            showNotification("Generasi dihentikan. ⏸️");
+        };
+
+        try {
+            const response = await fetch('/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ history: allChats[currentChatId], model: currentModel, mode: 'agent' }),
-            }).then(res => {
-                if (!res.ok) throw new Error(`Server error: ${res.statusText}`);
-                return res.json();
+                signal: abortController.signal,
+                body: JSON.stringify({ history: allChats[currentChatId], model: currentModel }),
             });
-
-            try {
-                const [_, result] = await Promise.all([simulationPromise, fetchPromise]);
-                await new Promise(resolve => setTimeout(resolve, 500));
-                const line = document.createElement('div');
-                line.className = 'log-line';
-                line.innerHTML = "<span class='tag'>[ Selesai ]</span> Proses building selesai!";
-                agentLogConsole.appendChild(line);
-
-                setTimeout(() => {
-                    agentLogConsole.style.display = 'none';
-                    livePreviewIframe.srcdoc = result.data;
-                    livePreviewIframe.style.opacity = '1';
-                    allChats[currentChatId].push({ role: 'model', parts: [{ text: result.data }] });
-                }, 1000);
-            } catch (error) {
-                 console.error("Agent mode error:", error);
-                 agentLogConsole.innerHTML = `<div class='log-line'><span class='tag'>[ ERROR ]</span> Gagal mem-build, coba lagi.</div>`;
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Server error: ${errorData.error || response.statusText}`);
             }
+            const result = await response.json();
+            
+            // Hapus indikator loading
+            clearInterval(loadingState.intervalId);
+            loadingState.element.remove();
 
-        } else {
-            const loadingState = appendLoadingIndicator();
-            abortController = new AbortController();
-            generateBtn.classList.add('generating');
-            let seconds = 0;
-            const generationTimer = setInterval(() => {
-                seconds++;
-                if (generateBtn.querySelector('.stop-timer')) generateBtn.querySelector('.stop-timer').textContent = formatTime(seconds);
-            }, 1000);
-            generateBtn.onclick = () => { abortController.abort(); };
+            const aiMessage = result.data;
+            const sourceLinks = result.sources || []; // Pastikan ini array
 
-            try {
-                const response = await fetch('/api/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    signal: abortController.signal,
-                    body: JSON.stringify({ history: allChats[currentChatId], model: currentModel, mode: 'chat' }),
-                });
-                if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
-                const result = await response.json();
-                clearInterval(loadingState.intervalId);
-                const loadingTextElement = loadingState.element.querySelector('.loading-text');
-                if (loadingTextElement) loadingTextElement.textContent = "Tentu, ini dia!";
-                setTimeout(() => {
-                    loadingState.element.remove();
-                    appendMessage('model', result.data);
-                    allChats[currentChatId].push({ role: 'model', parts: [{ text: result.data }] });
-                }, 700);
-            } catch (error) {
-                clearInterval(loadingState.intervalId);
-                loadingState.element.remove();
-                if (error.name === 'AbortError') { appendMessage('model', 'Respon dihentikan.'); } 
-                else { console.error("Error fetching AI response:", error); appendMessage('model', 'Maaf, terjadi kesalahan. 🤖'); }
-            } finally {
-                generateBtn.classList.remove('generating');
-                clearInterval(generationTimer);
-                generateBtn.onclick = handleSendMessage;
+            appendMessage('model', aiMessage, null, sourceLinks);
+            // Simpan respons AI ke riwayat chat, tanpa sumber untuk kesederhanaan struktur penyimpanan history
+            allChats[currentChatId].push({ role: 'model', parts: [{ text: aiMessage }] });
+
+        } catch (error) {
+            clearInterval(loadingState.intervalId);
+            loadingState.element.remove();
+            if (error.name === 'AbortError') { appendMessage('model', 'Respon dihentikan. 🛑'); } 
+            else { 
+                console.error("Error fetching AI response:", error); 
+                appendMessage('model', `Maaf, terjadi kesalahan. 🤖 Error: ${error.message}`);
+                showNotification(`Terjadi kesalahan: ${error.message}`, true);
             }
+        } finally {
+            generateBtn.classList.remove('generating');
+            clearInterval(generationTimer);
+            generateBtn.onclick = handleSendMessage; // Reset onclick ke handleSendMessage
         }
     };
 
     // --- Event Listener Kirim ---
     if (generateBtn) generateBtn.onclick = handleSendMessage;
-    if (chatInput) chatInput.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } });
+    if (chatInput) chatInput.addEventListener("keydown", (e) => { 
+        if (e.key === "Enter" && !e.shiftKey) { 
+            e.preventDefault(); 
+            handleSendMessage(); 
+        } 
+    });
 
     // --- Fungsi Tampilan Pesan ---
-    function appendMessage(role, text, imageUrl = null) {
+    function appendMessage(role, text, imageUrl = null, sourceLinks = []) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${role === 'user' ? 'user' : 'ai'}`;
+        
         if (imageUrl) {
             const img = document.createElement('img');
             img.src = imageUrl;
             img.alt = "Lampiran";
             messageDiv.appendChild(img);
         }
+
         if (text) {
             const p = document.createElement('p');
             if (role !== 'user' && window.marked) {
-                p.innerHTML = marked.parse(text.replace(/</g, "&lt;").replace(/>/g, "&gt;"));
+                // Gunakan marked.parse untuk markdown, tapi pastikan HTML escape
+                p.innerHTML = marked.parse(text); 
             } else {
                 p.textContent = text;
             }
             messageDiv.appendChild(p);
         }
+        
+        if (sourceLinks && sourceLinks.length > 0) {
+            const sourcesDiv = document.createElement('div');
+            sourcesDiv.className = 'source-links';
+            sourcesDiv.innerHTML = '<p>Sumber:</p><ul>' + 
+                sourceLinks.map(link => `<li><a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.title || link.url}</a></li>`).join('') +
+                '</ul>';
+            messageDiv.appendChild(sourcesDiv);
+        }
+
         if (chatContainer) chatContainer.appendChild(messageDiv);
         scrollToBottom();
     }
@@ -371,7 +384,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function appendLoadingIndicator() {
         const loadingDiv = document.createElement('div');
         loadingDiv.className = 'loading-indicator';
-        const loadingPhrases = ["Tunggu sebentar...", "Alfhaiz sedang berfikir...", "Menyusun jawaban..."];
+        const loadingPhrases = ["Tunggu sebentar...", "Alfhaiz sedang berfikir...", "Mencari informasi terkini...", "Menyusun jawaban terbaik...", "Hampir selesai..."];
         const loaderIcon = document.createElement('div');
         loaderIcon.className = 'gemini-loader';
         const loadingText = document.createElement('span');
@@ -411,6 +424,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const text = message.parts.find(p => p.text)?.text || '';
             const imagePart = message.parts.find(p => p.inlineData);
             const imageUrl = imagePart ? `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}` : null;
+            // Catatan: Source links tidak disimpan di `allChats` saat ini,
+            // jadi tidak akan dimuat kembali dari history.
             appendMessage(message.role, text, imageUrl);
         });
         setActiveHistoryItem(chatId);
