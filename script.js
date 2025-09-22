@@ -1,1 +1,474 @@
-document.addEventListener("DOMContentLoaded",()=>{const t=document.body,e=document.getElementById("menu-toggle-btn"),n=document.getElementById("sidebar-overlay"),o=document.getElementById("new-chat-btn"),i=document.getElementById("chat-container"),s=document.getElementById("welcome-screen"),a=document.getElementById("chat-input"),r=document.getElementById("generate-btn"),c=document.getElementById("history-container"),l=document.getElementById("voice-btn"),d=document.getElementById("more-options-btn"),u=document.getElementById("file-popup-menu"),m=document.getElementById("attach-file-btn"),p=document.getElementById("attach-camera-btn"),h=document.getElementById("file-input"),f=document.getElementById("attachment-preview"),g=document.getElementById("voice-recorder-ui"),v=document.getElementById("recorder-timer"),y=document.getElementById("waveform-visualizer"),b=document.querySelector(".recorder-actions"),w=document.querySelector(".recorder-status"),k=document.getElementById("delete-voice-btn"),E=document.getElementById("send-voice-btn"),x=document.getElementById("input-wrapper"),L=document.getElementById("model-selector-btn"),C=document.getElementById("model-modal"),S=document.querySelectorAll(".model-option"),A=document.getElementById("model-display-name"),I=document.getElementById("notification-toast"),B=document.getElementById("agent-mode-btn"),q=document.getElementById("live-preview-container"),T=document.getElementById("live-preview-iframe"),M=document.getElementById("agent-log-console");let P={},N=null,O="gemini-1.5-pro-latest",j=null,V=!1,F,z,R,W;const G=window.SpeechRecognition||window.webkitSpeechRecognition;G?(F=new G,F.continuous=!0,F.interimResults=!0,F.lang="id-ID",F.onresult=(t=>{let e="",n="";for(let o=t.resultIndex;o<t.results.length;++o)t.results[o].isFinal?n+=t.results[o][0].transcript:e+=t.results[o][0].transcript;a.value=n+e,a.style.height="auto",a.style.height=`${a.scrollHeight}px`}),F.onend=()=>{z=!1,clearInterval(R),w.style.display="none",b.style.display="flex"},F.onerror=t=>{console.error("Speech Recognition Error:",t.error),z=!1,clearInterval(R),g.style.display="none",x.style.display="flex"}):l&&(l.disabled=!0);const J=t=>{const e=Math.floor(t/60),n=t%60;return`${e.toString().padStart(2,"0")}:${n.toString().padStart(2,"0")}`},K=()=>{y.innerHTML="";for(let t=0;t<20;t++){const e=document.createElement("div");e.className="waveform-bar",e.style.animationDelay=`${.5*Math.random()}s`,e.style.animationDuration=`${.8+.7*Math.random()}s`,y.appendChild(e)}},U=t=>{I.textContent=t,I.classList.add("show"),setTimeout(()=>{I.classList.remove("show")},3e3)},Q=()=>{i&&i.scrollTop=i.scrollHeight};e.addEventListener("click",()=>t.classList.toggle("sidebar-open")),n.addEventListener("click",()=>t.classList.remove("sidebar-open")),d.addEventListener("click",(t=>{t.stopPropagation(),u.classList.toggle("active")})),window.addEventListener("click",()=>{u.classList.remove("active"),C.classList.remove("active")}),m.addEventListener("click",()=>{h.removeAttribute("capture"),h.setAttribute("accept","*/*"),h.click()}),p.addEventListener("click",()=>{h.setAttribute("capture","environment"),h.setAttribute("accept","image/*"),h.click()}),l.addEventListener("click",()=>{if(!F)return;z?F.stop():(z=!0,a.value="",F.start(),g.style.display="flex",x.style.display="none",w.style.display="flex",b.style.display="none",K(),(()=>{let t=0;v.textContent="00:00",R=setInterval(()=>{t++,v.textContent=J(t)},1e3)})())}),k.addEventListener("click",()=>{a.value="",g.style.display="none",x.style.display="flex"}),E.addEventListener("click",()=>{g.style.display="none",x.style.display="flex",$()}),S.forEach((t=>{t.addEventListener("click",()=>{O=t.dataset.model,A.textContent=t.dataset.displayName,S.forEach((t=>t.classList.remove("selected"))),t.classList.add("selected"),C.classList.remove("active"),U(`${t.dataset.displayName.toUpperCase()} READY`)})})),h.addEventListener("change",(t=>{const e=t.target.files[0];if(!e)return;const n=new FileReader;n.onloadend=()=>{const t=n.result,o=t.split(",")[1];j={mimeType:e.type,base64:o},tt(e.name,t)},n.readAsDataURL(e),u.classList.remove("active")})),a.addEventListener("input",()=>{a.style.height="auto",a.style.height=`${a.scrollHeight}px`}),B.addEventListener("click",()=>{V=!V,B.classList.toggle("active"),V?(a.placeholder="Perintahkan saya untuk membuat sesuatu...",i.style.display="none",s.style.display="none",q.style.display="flex",M.innerHTML="",T.style.opacity="0"):(a.placeholder="Ask me anything...",i.style.display="flex",i.querySelector(".message")||(s.style.display="block"),q.style.display="none")}),r.onclick=$,a.addEventListener("keydown",(t=>{t.key==="Enter"&&!t.shiftKey&&(t.preventDefault(),$())}));async function $(){const t=a.value.trim();if(!t&&!j)return;if(V)await(async function(t){r.disabled=!0,M.innerHTML="",T.style.opacity="0";const e=["<span class='tag'>[ Menganalisis ]</span> Menganalisis permintaan Anda...","<span class='tag'>[ Merancang ]</span> Merancang struktur dasar HTML...","<span class='tag'>[ Menulis Kode ]</span> Menulis CSS & JavaScript...","<span class='tag'>[ Finalisasi ]</span> Merender kode dan menyelesaikan..."],n=async()=>{M.style.display="flex";for(let t=0;t<e.length;t++){await new Promise((e=>setTimeout(e,800+500*Math.random())));const n=document.createElement("div");n.className="log-line",n.innerHTML=e[t],M.appendChild(n),M.scrollTop=M.scrollHeight}};const o=it("agent",[{text:t}]);try{const[t,i]=await Promise.all([n(),o]);await new Promise((e=>setTimeout(e,500)));const s=document.createElement("div");s.className="log-line",s.innerHTML="<span class='tag'>[ Selesai ]</span> Proses building selesai!",M.appendChild(s),setTimeout(()=>{M.style.display="none",T.srcdoc=i.data,T.style.opacity="1"},1e3)}catch(t){console.error("Agent mode error:",t),M.innerHTML="<div class='log-line'><span class='tag'>[ ERROR ]</span> Gagal mem-build, coba lagi.</div>"}finally{r.disabled=!1}}(t));else{et(t);const e=a.value;a.value="",a.style.height="auto",nt();const n=rt();W=new AbortController,r.classList.add("generating"),r.onclick=()=>{W.abort()};try{const t=await it("chat",P[N]);n.element.remove(),st(t.data)}catch(t){n.element.remove(),"AbortError"===t.name?st("Respon dihentikan."):(console.error("Error fetching AI response:",t),st("Maaf, terjadi kesalahan. 🤖"))}finally{r.classList.remove("generating"),r.onclick=$}}a.value="",a.style.height="auto"}function tt(t,e){f.innerHTML=`<div class="preview-item">${e.startsWith("data:image")?`<img src="${e}" alt="Preview">`:""}<span>${t}</span><button class="remove-attachment-btn" id="remove-attachment-btn">&times;</button></div>`,document.getElementById("remove-attachment-btn").addEventListener("click",nt)}function et(t){s.style.display="none",N||(N=`chat_${Date.now()}`,P[N]=[],at(N,t||"Chat with attachment"));const e=[],n=j?`data:${j.mimeType};base64,${j.base64}`:null;j&&e.push({inlineData:{mimeType:j.mimeType,data:j.base64}}),t&&e.push({text:t}),lt(t,n),P[N].push({role:"user",parts:e})}function nt(){j=null,h.value="",f.innerHTML=""}o.addEventListener("click",(t=>{t.preventDefault(),N=null,dt(),t.classList.contains("sidebar-open")&&t.classList.remove("sidebar-open"),ut(null)})),r.onclick=$,a.addEventListener("keydown",(t=>{"Enter"===t.key&&!t.shiftKey&&(t.preventDefault(),$())}));async function it(t,e){const n=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},signal:W?W.signal:null,body:JSON.stringify({history:e,model:O,mode:t})});if(!n.ok){const t=await n.json();throw new Error(t.error||`HTTP error! status: ${n.status}`)}return await n.json()}function st(t){ct("model",t),N&&P[N]&&P[N].push({role:"model",parts:[{text:t}]})}function at(t,e){const n=document.createElement("a");n.href="#",n.className="nav-item",n.dataset.chatId=t,n.innerHTML=`<svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.01L3 11v2h18zM3 16h12v2H3zM21 6H3v2.01L21 8z"></path></svg><span>${e.substring(0,20)+(e.length>20?"...":"")}</span>`,n.addEventListener("click",(e=>{e.preventDefault(),pt(t)})),c.prepend(n),ut(t)}function rt(){const t=document.createElement("div");t.className="loading-indicator";const e=["Tunggu sebentar...","Alfhaiz sedang berfikir...","Menyusun jawaban..."];const n=document.createElement("div");n.className="gemini-loader";const o=document.createElement("span");return o.className="loading-text",o.textContent=e[0],t.appendChild(n),t.appendChild(o),i.appendChild(t),Q(),(()=>{let t=1;const n=setInterval((()=>{o.textContent=e[t%e.length],t++}),2e3);return{element:t,intervalId:n}})()}function ct(t,e){const n=document.createElement("div");n.className=`message ${"user"===t?"user":"ai"}`,e&&("model"!==t&&window.marked?n.innerHTML=marked.parse(e.replace(/</g,"&lt;").replace(/>/g,"&gt;")):n.textContent=e),i.appendChild(n),Q()}function lt(t,e=null){const n=document.createElement("div");n.className="message user",e&&(()=>{const t=document.createElement("img");t.src=e,t.alt="Lampiran",n.appendChild(t)})(),t&&(()=>{const e=document.createElement("p");e.textContent=t,n.appendChild(e)})(),i.appendChild(n),Q()}function dt(){i.querySelectorAll(".message, .loading-indicator").forEach((t=>t.remove())),s.style.display="block",nt(),document.querySelectorAll("#history-container .nav-item").forEach((t=>t.classList.remove("active")))}function ut(t){document.querySelectorAll("#history-container .nav-item").forEach((e=>{e.dataset.chatId===t?e.classList.add("active"):e.classList.remove("active")})),t?o.classList.remove("active"):o.classList.add("active")}function mt(t){const e=P[t].find((t=>t.parts.find((t=>t.text))))?.parts.find((t=>t.text)).text||"";at(t,e)}function pt(t){if(!P[t])return;N=t,dt(),s.style.display="none";P[t].forEach((t=>{const e=t.parts.find((t=>t.text))?.text||"",n=t.parts.find((t=>t.inlineData)),o=n?`data:${n.inlineData.mimeType};base64,${n.inlineData.data}`:null;"user"===t.role?lt(e,o):st(e)})),ut(t)}});
+document.addEventListener("DOMContentLoaded", () => {
+    // --- Elemen DOM ---
+    const body = document.body;
+    const menuToggleBtn = document.getElementById("menu-toggle-btn");
+    const sidebarOverlay = document.getElementById("sidebar-overlay");
+    const newChatBtn = document.getElementById("new-chat-btn");
+    const chatContainer = document.getElementById("chat-container");
+    const welcomeScreen = document.getElementById("welcome-screen");
+    const chatInput = document.getElementById("chat-input");
+    const generateBtn = document.getElementById("generate-btn");
+    const historyContainer = document.getElementById("history-container");
+    const voiceBtn = document.getElementById('voice-btn');
+    const moreOptionsBtn = document.getElementById('more-options-btn');
+    const filePopupMenu = document.getElementById('file-popup-menu');
+    const attachFileBtn = document.getElementById('attach-file-btn');
+    const attachCameraBtn = document.getElementById('attach-camera-btn');
+    const fileInput = document.getElementById('file-input');
+    const attachmentPreview = document.getElementById("attachment-preview");
+    const voiceRecorderUI = document.getElementById('voice-recorder-ui');
+    const recorderTimer = document.getElementById('recorder-timer');
+    const waveformVisualizer = document.getElementById('waveform-visualizer');
+    const recorderActions = document.querySelector('.recorder-actions');
+    const recorderStatus = document.querySelector('.recorder-status');
+    const deleteVoiceBtn = document.getElementById('delete-voice-btn');
+    const sendVoiceBtn = document.getElementById('send-voice-btn');
+    const inputWrapper = document.getElementById('input-wrapper');
+    const modelSelectorBtn = document.getElementById('model-selector-btn');
+    const modelModal = document.getElementById('model-modal');
+    const modelOptions = document.querySelectorAll('.model-option');
+    const modelDisplayName = document.getElementById('model-display-name');
+    const notificationToast = document.getElementById('notification-toast');
+    const agentModeBtn = document.getElementById('agent-mode-btn');
+    const livePreviewContainer = document.getElementById('live-preview-container');
+    const livePreviewIframe = document.getElementById('live-preview-iframe');
+    const agentLogConsole = document.getElementById('agent-log-console');
+
+    // --- State Aplikasi ---
+    let allChats = {};
+    let currentChatId = null;
+    let currentModel = 'gemini-1.5-pro-latest';
+    let attachedFile = null;
+    let isAgentMode = false;
+    let recognition;
+    let isRecording = false;
+    let timerInterval;
+    let abortController;
+
+    // --- Inisialisasi Speech Recognition & Helpers ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'id-ID';
+
+        recognition.onresult = (event) => {
+            let interimTranscript = '';
+            let finalTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
+            }
+            chatInput.value = finalTranscript + interimTranscript;
+            autoResizeTextarea();
+        };
+
+        recognition.onend = () => {
+            isRecording = false;
+            clearInterval(timerInterval);
+            recorderStatus.style.display = 'none';
+            recorderActions.style.display = 'flex';
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Speech Recognition Error:", event.error);
+            isRecording = false;
+            clearInterval(timerInterval);
+            voiceRecorderUI.style.display = 'none';
+            inputWrapper.style.display = 'flex';
+        };
+    } else {
+        if (voiceBtn) voiceBtn.disabled = true;
+    }
+
+    const formatTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const createVisualizerBars = () => {
+        waveformVisualizer.innerHTML = '';
+        for (let i = 0; i < 20; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'waveform-bar';
+            bar.style.animationDelay = `${Math.random() * 0.5}s`;
+            bar.style.animationDuration = `${0.8 + Math.random() * 0.7}s`;
+            waveformVisualizer.appendChild(bar);
+        }
+    };
+    
+    const showNotification = (message) => {
+        notificationToast.textContent = message;
+        notificationToast.classList.add('show');
+        setTimeout(() => {
+            notificationToast.classList.remove('show');
+        }, 3000);
+    };
+
+    const scrollToBottom = () => {
+        if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
+    };
+    
+    const autoResizeTextarea = () => {
+        chatInput.style.height = 'auto';
+        chatInput.style.height = `${chatInput.scrollHeight}px`;
+    };
+
+    // --- Event Listeners UI Dasar ---
+    menuToggleBtn.addEventListener("click", () => body.classList.toggle("sidebar-open"));
+    sidebarOverlay.addEventListener("click", () => body.classList.remove("sidebar-open"));
+    moreOptionsBtn.addEventListener('click', (e) => { e.stopPropagation(); filePopupMenu.classList.toggle('active'); });
+    window.addEventListener("click", () => {
+        filePopupMenu.classList.remove('active');
+        modelModal.classList.remove('active');
+    });
+    attachFileBtn.addEventListener('click', () => { fileInput.removeAttribute('capture'); fileInput.setAttribute('accept', '*/*'); fileInput.click(); });
+    attachCameraBtn.addEventListener('click', () => { fileInput.setAttribute('capture', 'environment'); fileInput.setAttribute('accept', 'image/*'); fileInput.click(); });
+    voiceBtn.addEventListener('click', () => {
+        if (!recognition) return;
+        if (isRecording) {
+            recognition.stop();
+        } else {
+            isRecording = true;
+            chatInput.value = '';
+            recognition.start();
+            voiceRecorderUI.style.display = 'flex';
+            inputWrapper.style.display = 'none';
+            recorderStatus.style.display = 'flex';
+            recorderActions.style.display = 'none';
+            createVisualizerBars();
+            let seconds = 0;
+            recorderTimer.textContent = '00:00';
+            timerInterval = setInterval(() => {
+                seconds++;
+                recorderTimer.textContent = formatTime(seconds);
+            }, 1000);
+        }
+    });
+    deleteVoiceBtn.addEventListener('click', () => {
+        chatInput.value = '';
+        voiceRecorderUI.style.display = 'none';
+        inputWrapper.style.display = 'flex';
+    });
+    sendVoiceBtn.addEventListener('click', () => {
+        voiceRecorderUI.style.display = 'none';
+        inputWrapper.style.display = 'flex';
+        handleSendMessage();
+    });
+    modelSelectorBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        modelModal.classList.add('active');
+    });
+    modelOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            currentModel = option.dataset.model;
+            modelDisplayName.textContent = option.dataset.displayName;
+            document.querySelector('.model-option.selected').classList.remove('selected');
+            option.classList.add('selected');
+            modelModal.classList.remove('active');
+            showNotification(`${option.dataset.displayName.toUpperCase()} READY`);
+        });
+    });
+    fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const dataUrl = reader.result;
+            const base64Data = dataUrl.split(',')[1];
+            attachedFile = { mimeType: file.type, base64: base64Data };
+            displayAttachmentPreview(file.name, dataUrl);
+        };
+        reader.readAsDataURL(file);
+        filePopupMenu.classList.remove('active');
+    });
+    chatInput.addEventListener('input', autoResizeTextarea);
+
+    // --- Logika Mode Agen ---
+    agentModeBtn.addEventListener('click', () => {
+        isAgentMode = !isAgentMode;
+        agentModeBtn.classList.toggle('active');
+        if (isAgentMode) {
+            chatInput.placeholder = 'Perintahkan saya untuk membuat sesuatu...';
+            chatContainer.style.display = 'none';
+            welcomeScreen.style.display = 'none'; // Pastikan welcome screen juga hilang
+            livePreviewContainer.style.display = 'flex';
+            // Kosongkan log dan iframe saat beralih
+            agentLogConsole.innerHTML = '';
+            livePreviewIframe.srcdoc = '';
+            livePreviewIframe.style.opacity = '0';
+        } else {
+            chatInput.placeholder = 'Ask me anything...';
+            chatContainer.style.display = 'flex';
+            if (!chatContainer.querySelector('.message')) {
+                welcomeScreen.style.display = 'block';
+            }
+            livePreviewContainer.style.display = 'none';
+        }
+    });
+
+    // --- Fungsi Pengiriman Pesan Inti ---
+    const handleSendMessage = async () => {
+        const prompt = chatInput.value.trim();
+        if (!prompt && !attachedFile) return;
+
+        if (isAgentMode) {
+            await runAgentMode(prompt);
+        } else {
+            await runChatMode(prompt);
+        }
+        
+        chatInput.value = '';
+        autoResizeTextarea();
+    };
+
+    generateBtn.onclick = handleSendMessage;
+    chatInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
+        }
+    });
+
+    // --- Alur Mode Chat ---
+    async function runChatMode(prompt) {
+        displayUserMessage(prompt);
+        clearAttachment();
+
+        const loadingIndicator = appendLoadingIndicator();
+        abortController = new AbortController();
+        generateBtn.classList.add('generating');
+        generateBtn.onclick = () => abortController.abort(); // Fungsionalitas tombol stop
+
+        try {
+            const response = await callApi("chat", allChats[currentChatId]);
+            loadingIndicator.remove();
+            displayAiMessage(response.data);
+        } catch (error) {
+            loadingIndicator.remove();
+            if (error.name === 'AbortError') {
+                displayAiMessage('Respon dihentikan.');
+            } else {
+                console.error("Error fetching AI response:", error);
+                displayAiMessage('Maaf, terjadi kesalahan. 🤖');
+            }
+        } finally {
+            generateBtn.classList.remove('generating');
+            generateBtn.onclick = handleSendMessage;
+        }
+    }
+    
+    // --- Alur Mode Agen ---
+    async function runAgentMode(prompt) {
+        generateBtn.disabled = true;
+        agentLogConsole.innerHTML = '';
+        livePreviewIframe.style.opacity = '0';
+        M.style.display = 'flex'; // Tampilkan konsol log
+    
+        const logLines = [
+            "<span class='tag'>[ Menganalisis ]</span> Menganalisis permintaan Anda...",
+            "<span class='tag'>[ Merancang ]</span> Merancang struktur dasar HTML...",
+            "<span class='tag'>[ Menulis Kode ]</span> Menulis CSS & JavaScript...",
+            "<span class='tag'>[ Finalisasi ]</span> Merender kode dan menyelesaikan..."
+        ];
+    
+        const runLogAnimation = async () => {
+            for (const lineText of logLines) {
+                await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 500));
+                const line = document.createElement('div');
+                line.className = 'log-line';
+                line.innerHTML = lineText;
+                agentLogConsole.appendChild(line);
+                agentLogConsole.scrollTop = agentLogConsole.scrollHeight;
+            }
+        };
+    
+        const fetchCode = callApi("agent", [{ role: 'user', parts: [{ text: prompt }] }]);
+    
+        try {
+            const [_, result] = await Promise.all([runLogAnimation(), fetchCode]);
+    
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const doneLine = document.createElement('div');
+            doneLine.className = 'log-line';
+            doneLine.innerHTML = "<span class='tag'>[ Selesai ]</span> Proses building selesai!";
+            agentLogConsole.appendChild(doneLine);
+    
+            setTimeout(() => {
+                agentLogConsole.style.display = 'none';
+                livePreviewIframe.srcdoc = result.data;
+                livePreviewIframe.style.opacity = '1';
+            }, 1000);
+    
+        } catch (error) {
+            console.error("Agent mode error:", error);
+            agentLogConsole.innerHTML = `<div class='log-line'><span class='tag'>[ ERROR ]</span> Gagal mem-build, coba lagi.</div>`;
+        } finally {
+            generateBtn.disabled = false;
+        }
+    }
+
+    // --- Fungsi Helper untuk API dan Tampilan ---
+    async function callApi(mode, history) {
+        const response = await fetch('/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: abortController ? abortController.signal : null,
+            body: JSON.stringify({ history, model: currentModel, mode })
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.json();
+            throw new Error(errorBody.error || `HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    }
+
+    function displayUserMessage(prompt) {
+        if (welcomeScreen) welcomeScreen.style.display = 'none';
+        if (!currentChatId) {
+            currentChatId = `chat_${Date.now()}`;
+            allChats[currentChatId] = [];
+            createHistoryItem(currentChatId, prompt || "Chat with attachment");
+        }
+        const userParts = [];
+        const imageUrl = attachedFile ? `data:${attachedFile.mimeType};base64,${attachedFile.base64}` : null;
+        if (attachedFile) {
+            userParts.push({ inlineData: { mimeType: attachedFile.mimeType, data: attachedFile.base64 } });
+        }
+        if (prompt) {
+            userParts.push({ text: prompt });
+        }
+        
+        appendMessage('user', prompt, imageUrl);
+        allChats[currentChatId].push({ role: 'user', parts: userParts });
+    }
+
+    function displayAiMessage(message) {
+        appendMessage('model', message);
+        if(currentChatId && allChats[currentChatId]) {
+            allChats[currentChatId].push({ role: 'model', parts: [{ text: message }] });
+        }
+    }
+
+    function appendMessage(role, text, imageUrl = null) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${role === 'user' ? 'user' : 'ai'}`;
+        
+        if (imageUrl) {
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.alt = "Lampiran";
+            messageDiv.appendChild(img);
+        }
+
+        if (text) {
+            const contentContainer = document.createElement('div');
+            if (role !== 'user' && window.marked) {
+                contentContainer.innerHTML = marked.parse(text);
+            } else {
+                contentContainer.textContent = text;
+            }
+            messageDiv.appendChild(contentContainer);
+        }
+        
+        chatContainer.appendChild(messageDiv);
+        scrollToBottom();
+    }
+    
+    function appendLoadingIndicator() {
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'message ai loading-indicator';
+        const loadingPhrases = ["Tunggu sebentar...", "Alfhaiz sedang berfikir...", "Menyusun jawaban..."];
+        loadingDiv.innerHTML = `<div class="gemini-loader"></div><span class="loading-text">${loadingPhrases[0]}</span>`;
+        chatContainer.appendChild(loadingDiv);
+        scrollToBottom();
+        
+        let phraseIndex = 1;
+        const textInterval = setInterval(() => {
+            const loadingText = loadingDiv.querySelector('.loading-text');
+            if(loadingText) loadingText.textContent = loadingPhrases[phraseIndex % loadingPhrases.length];
+            phraseIndex++;
+        }, 2500);
+
+        // Return the element so it can be removed
+        return loadingDiv;
+    }
+    
+    // --- Fungsi Sistem History Chat ---
+    newChatBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        currentChatId = null;
+        clearChatScreen();
+        if (body.classList.contains("sidebar-open")) {
+            body.classList.remove("sidebar-open");
+        }
+        setActiveHistoryItem(null);
+    });
+
+    function clearChatScreen() {
+        chatContainer.innerHTML = ''; // Clear all messages and indicators
+        welcomeScreen.style.display = 'block';
+        clearAttachment();
+        document.querySelectorAll('#history-container .nav-item').forEach(item => item.classList.remove('active'));
+    }
+    
+    function displayAttachmentPreview(fileName, dataUrl) {
+        attachmentPreview.innerHTML = `<div class="preview-item">${dataUrl.startsWith('data:image')?`<img src="${dataUrl}" alt="Preview">`:''}<span>${fileName}</span><button class="remove-attachment-btn" id="remove-attachment-btn">&times;</button></div>`;
+        document.getElementById('remove-attachment-btn').addEventListener('click', clearAttachment);
+    }
+    
+    function clearAttachment() {
+        attachedFile = null;
+        fileInput.value = '';
+        attachmentPreview.innerHTML = '';
+    }
+
+    function createHistoryItem(chatId, prompt) {
+        const historyItem = document.createElement('a');
+        historyItem.href = '#';
+        historyItem.className = 'nav-item';
+        historyItem.dataset.chatId = chatId;
+        historyItem.innerHTML = `<svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.01L3 11v2h18zM3 16h12v2H3zM21 6H3v2.01L21 8z"></path></svg><span>${prompt.substring(0, 20) + (prompt.length > 20 ? '...' : '')}</span>`;
+        historyItem.addEventListener('click', (e) => {
+            e.preventDefault();
+            loadChatHistory(chatId);
+        });
+        historyContainer.prepend(historyItem);
+        setActiveHistoryItem(chatId);
+    }
+
+    function loadChatHistory(chatId) {
+        if (!allChats[chatId]) return;
+        currentChatId = chatId;
+        clearChatScreen();
+        welcomeScreen.style.display = 'none';
+        allChats[chatId].forEach(message => {
+            const text = message.parts.find(p => p.text)?.text || '';
+            const imagePart = message.parts.find(p => p.inlineData);
+            const imageUrl = imagePart ? `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}` : null;
+            appendMessage(message.role, text, imageUrl);
+        });
+        setActiveHistoryItem(chatId);
+    }
+
+    function setActiveHistoryItem(chatId) {
+        document.querySelectorAll('#history-container .nav-item').forEach(item => {
+            if (item.dataset.chatId === chatId) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+        if (chatId) {
+            newChatBtn.classList.remove('active');
+        } else {
+            newChatBtn.classList.add('active');
+        }
+    }
+});
