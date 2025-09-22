@@ -29,10 +29,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const modelOptions = document.querySelectorAll('.model-option');
     const modelDisplayName = document.getElementById('model-display-name');
     const notificationToast = document.getElementById('notification-toast');
+    
+    // Elemen Mode Agen (Builder)
     const agentModeBtn = document.getElementById('agent-mode-btn');
-    const livePreviewContainer = document.getElementById('live-preview-container');
-    const livePreviewIframe = document.getElementById('live-preview-iframe');
-    const agentLogConsole = document.getElementById('agent-log-console');
+    const builderContainer = document.getElementById("builder-container");
+    const fileListContainer = document.getElementById("file-list");
+    const buildStatus = document.getElementById("build-status");
+    const downloadSection = document.getElementById("download-section");
+    const livePreviewIframe = document.getElementById("live-preview-iframe");
 
     // --- State Aplikasi ---
     let allChats = {};
@@ -40,185 +44,75 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentModel = 'gemini-1.5-pro-latest';
     let attachedFile = null;
     let isAgentMode = false;
-    let recognition;
+    let isBuilding = false;
     let isRecording = false;
+    let recognition;
     let timerInterval;
     let abortController;
 
-    // --- Inisialisasi Speech Recognition & Helpers ---
+    // --- Inisialisasi & Logika UI Dasar ---
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
         recognition.lang = 'id-ID';
-
         recognition.onresult = (event) => {
             let interimTranscript = '';
             let finalTranscript = '';
             for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript;
-                } else {
-                    interimTranscript += event.results[i][0].transcript;
-                }
+                if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+                else interimTranscript += event.results[i][0].transcript;
             }
             chatInput.value = finalTranscript + interimTranscript;
             autoResizeTextarea();
         };
+        recognition.onend = () => { isRecording = false; clearInterval(timerInterval); recorderStatus.style.display = 'none'; recorderActions.style.display = 'flex'; };
+        recognition.onerror = (event) => { console.error("Speech Recognition Error:", event.error); isRecording = false; clearInterval(timerInterval); voiceRecorderUI.style.display = 'none'; inputWrapper.style.display = 'flex'; };
+    } else { if (voiceBtn) voiceBtn.disabled = true; }
 
-        recognition.onend = () => {
-            isRecording = false;
-            clearInterval(timerInterval);
-            recorderStatus.style.display = 'none';
-            recorderActions.style.display = 'flex';
-        };
+    const formatTime = (seconds) => { const m = Math.floor(seconds / 60); const s = seconds % 60; return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; };
+    const createVisualizerBars = () => { waveformVisualizer.innerHTML = ''; for (let i = 0; i < 20; i++) { const bar = document.createElement('div'); bar.className = 'waveform-bar'; bar.style.animationDelay = `${Math.random()*0.5}s`; bar.style.animationDuration = `${0.8+Math.random()*0.7}s`; waveformVisualizer.appendChild(bar); }};
+    const showNotification = (message) => { notificationToast.textContent = message; notificationToast.classList.add('show'); setTimeout(() => { notificationToast.classList.remove('show'); }, 3000); };
+    const scrollToBottom = () => { if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; };
+    const autoResizeTextarea = () => { chatInput.style.height = 'auto'; chatInput.style.height = `${chatInput.scrollHeight}px`; };
 
-        recognition.onerror = (event) => {
-            console.error("Speech Recognition Error:", event.error);
-            isRecording = false;
-            clearInterval(timerInterval);
-            voiceRecorderUI.style.display = 'none';
-            inputWrapper.style.display = 'flex';
-        };
-    } else {
-        if (voiceBtn) voiceBtn.disabled = true;
-    }
-
-    const formatTime = (seconds) => {
-        const minutes = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    };
-
-    const createVisualizerBars = () => {
-        waveformVisualizer.innerHTML = '';
-        for (let i = 0; i < 20; i++) {
-            const bar = document.createElement('div');
-            bar.className = 'waveform-bar';
-            bar.style.animationDelay = `${Math.random() * 0.5}s`;
-            bar.style.animationDuration = `${0.8 + Math.random() * 0.7}s`;
-            waveformVisualizer.appendChild(bar);
-        }
-    };
-    
-    const showNotification = (message) => {
-        notificationToast.textContent = message;
-        notificationToast.classList.add('show');
-        setTimeout(() => {
-            notificationToast.classList.remove('show');
-        }, 3000);
-    };
-
-    const scrollToBottom = () => {
-        if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
-    };
-    
-    const autoResizeTextarea = () => {
-        chatInput.style.height = 'auto';
-        chatInput.style.height = `${chatInput.scrollHeight}px`;
-    };
-
-    // --- Event Listeners UI Dasar ---
     menuToggleBtn.addEventListener("click", () => body.classList.toggle("sidebar-open"));
     sidebarOverlay.addEventListener("click", () => body.classList.remove("sidebar-open"));
     moreOptionsBtn.addEventListener('click', (e) => { e.stopPropagation(); filePopupMenu.classList.toggle('active'); });
-    window.addEventListener("click", () => {
-        filePopupMenu.classList.remove('active');
-        modelModal.classList.remove('active');
-    });
+    window.addEventListener("click", () => { filePopupMenu.classList.remove('active'); modelModal.classList.remove('active'); });
     attachFileBtn.addEventListener('click', () => { fileInput.removeAttribute('capture'); fileInput.setAttribute('accept', '*/*'); fileInput.click(); });
     attachCameraBtn.addEventListener('click', () => { fileInput.setAttribute('capture', 'environment'); fileInput.setAttribute('accept', 'image/*'); fileInput.click(); });
-    voiceBtn.addEventListener('click', () => {
-        if (!recognition) return;
-        if (isRecording) {
-            recognition.stop();
-        } else {
-            isRecording = true;
-            chatInput.value = '';
-            recognition.start();
-            voiceRecorderUI.style.display = 'flex';
-            inputWrapper.style.display = 'none';
-            recorderStatus.style.display = 'flex';
-            recorderActions.style.display = 'none';
-            createVisualizerBars();
-            let seconds = 0;
-            recorderTimer.textContent = '00:00';
-            timerInterval = setInterval(() => {
-                seconds++;
-                recorderTimer.textContent = formatTime(seconds);
-            }, 1000);
-        }
-    });
-    deleteVoiceBtn.addEventListener('click', () => {
-        chatInput.value = '';
-        voiceRecorderUI.style.display = 'none';
-        inputWrapper.style.display = 'flex';
-    });
-    sendVoiceBtn.addEventListener('click', () => {
-        voiceRecorderUI.style.display = 'none';
-        inputWrapper.style.display = 'flex';
-        handleSendMessage();
-    });
-    modelSelectorBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        modelModal.classList.add('active');
-    });
-    modelOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            currentModel = option.dataset.model;
-            modelDisplayName.textContent = option.dataset.displayName;
-            document.querySelector('.model-option.selected').classList.remove('selected');
-            option.classList.add('selected');
-            modelModal.classList.remove('active');
-            showNotification(`${option.dataset.displayName.toUpperCase()} READY`);
-        });
-    });
-    fileInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const dataUrl = reader.result;
-            const base64Data = dataUrl.split(',')[1];
-            attachedFile = { mimeType: file.type, base64: base64Data };
-            displayAttachmentPreview(file.name, dataUrl);
-        };
-        reader.readAsDataURL(file);
-        filePopupMenu.classList.remove('active');
-    });
+    voiceBtn.addEventListener('click', () => { if (!recognition) return; if (isRecording) { recognition.stop(); } else { isRecording = true; chatInput.value = ''; recognition.start(); voiceRecorderUI.style.display = 'flex'; inputWrapper.style.display = 'none'; recorderStatus.style.display = 'flex'; recorderActions.style.display = 'none'; createVisualizerBars(); let seconds = 0; recorderTimer.textContent = '00:00'; timerInterval = setInterval(() => { seconds++; recorderTimer.textContent = formatTime(seconds); }, 1000); }});
+    deleteVoiceBtn.addEventListener('click', () => { chatInput.value = ''; voiceRecorderUI.style.display = 'none'; inputWrapper.style.display = 'flex'; });
+    sendVoiceBtn.addEventListener('click', () => { voiceRecorderUI.style.display = 'none'; inputWrapper.style.display = 'flex'; handleSendMessage(); });
+    modelSelectorBtn.addEventListener('click', (e) => { e.stopPropagation(); modelModal.classList.add('active'); });
+    modelOptions.forEach(option => { option.addEventListener('click', () => { currentModel = option.dataset.model; modelDisplayName.textContent = option.dataset.displayName; document.querySelector('.model-option.selected').classList.remove('selected'); option.classList.add('selected'); modelModal.classList.remove('active'); showNotification(`${option.dataset.displayName.toUpperCase()} READY`); }); });
+    fileInput.addEventListener('change', (event) => { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onloadend = () => { const dataUrl = reader.result; const base64Data = dataUrl.split(',')[1]; attachedFile = { mimeType: file.type, base64: base64Data }; displayAttachmentPreview(file.name, dataUrl); }; reader.readAsDataURL(file); filePopupMenu.classList.remove('active'); });
     chatInput.addEventListener('input', autoResizeTextarea);
 
-    // --- Logika Mode Agen ---
+    // --- Logika Inti ---
     agentModeBtn.addEventListener('click', () => {
         isAgentMode = !isAgentMode;
         agentModeBtn.classList.toggle('active');
+
         if (isAgentMode) {
-            chatInput.placeholder = 'Perintahkan saya untuk membuat sesuatu...';
+            chatInput.placeholder = 'What should we create?';
             chatContainer.style.display = 'none';
-            welcomeScreen.style.display = 'none'; // Pastikan welcome screen juga hilang
-            livePreviewContainer.style.display = 'flex';
-            // Kosongkan log dan iframe saat beralih
-            agentLogConsole.innerHTML = '';
-            livePreviewIframe.srcdoc = '';
-            livePreviewIframe.style.opacity = '0';
+            builderContainer.style.display = 'flex';
         } else {
             chatInput.placeholder = 'Ask me anything...';
             chatContainer.style.display = 'flex';
-            if (!chatContainer.querySelector('.message')) {
-                welcomeScreen.style.display = 'block';
-            }
-            livePreviewContainer.style.display = 'none';
+            builderContainer.style.display = 'none';
         }
     });
 
-    // --- Fungsi Pengiriman Pesan Inti ---
     const handleSendMessage = async () => {
         const prompt = chatInput.value.trim();
-        if (!prompt && !attachedFile) return;
+        if ((!prompt && !attachedFile) || isBuilding) return;
 
         if (isAgentMode) {
-            await runAgentMode(prompt);
+            await startBuildProcess(prompt);
         } else {
             await runChatMode(prompt);
         }
@@ -239,16 +133,15 @@ document.addEventListener("DOMContentLoaded", () => {
     async function runChatMode(prompt) {
         displayUserMessage(prompt);
         clearAttachment();
-
         const loadingIndicator = appendLoadingIndicator();
         abortController = new AbortController();
         generateBtn.classList.add('generating');
-        generateBtn.onclick = () => abortController.abort(); // Fungsionalitas tombol stop
+        generateBtn.onclick = () => { abortController.abort(); };
 
         try {
-            const response = await callApi("chat", allChats[currentChatId]);
+            const result = await callApi('chat', allChats[currentChatId]);
             loadingIndicator.remove();
-            displayAiMessage(response.data);
+            displayAiMessage(result.data);
         } catch (error) {
             loadingIndicator.remove();
             if (error.name === 'AbortError') {
@@ -262,66 +155,94 @@ document.addEventListener("DOMContentLoaded", () => {
             generateBtn.onclick = handleSendMessage;
         }
     }
-    
-    // --- Alur Mode Agen ---
-    async function runAgentMode(prompt) {
+
+    // --- Alur Kerja Builder (Tiru Manus.im) ---
+    async function startBuildProcess(prompt) {
+        isBuilding = true;
         generateBtn.disabled = true;
-        agentLogConsole.innerHTML = '';
-        livePreviewIframe.style.opacity = '0';
-        M.style.display = 'flex'; // Tampilkan konsol log
-    
-        const logLines = [
-            "<span class='tag'>[ Menganalisis ]</span> Menganalisis permintaan Anda...",
-            "<span class='tag'>[ Merancang ]</span> Merancang struktur dasar HTML...",
-            "<span class='tag'>[ Menulis Kode ]</span> Menulis CSS & JavaScript...",
-            "<span class='tag'>[ Finalisasi ]</span> Merender kode dan menyelesaikan..."
-        ];
-    
-        const runLogAnimation = async () => {
-            for (const lineText of logLines) {
-                await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 500));
-                const line = document.createElement('div');
-                line.className = 'log-line';
-                line.innerHTML = lineText;
-                agentLogConsole.appendChild(line);
-                agentLogConsole.scrollTop = agentLogConsole.scrollHeight;
-            }
-        };
-    
-        const fetchCode = callApi("agent", [{ role: 'user', parts: [{ text: prompt }] }]);
-    
+        fileListContainer.innerHTML = '';
+        downloadSection.innerHTML = '';
+        livePreviewIframe.srcdoc = '';
+        buildStatus.textContent = 'Analyzing request and creating plan...';
+
         try {
-            const [_, result] = await Promise.all([runLogAnimation(), fetchCode]);
-    
-            await new Promise(resolve => setTimeout(resolve, 500));
-            const doneLine = document.createElement('div');
-            doneLine.className = 'log-line';
-            doneLine.innerHTML = "<span class='tag'>[ Selesai ]</span> Proses building selesai!";
-            agentLogConsole.appendChild(doneLine);
-    
-            setTimeout(() => {
-                agentLogConsole.style.display = 'none';
-                livePreviewIframe.srcdoc = result.data;
-                livePreviewIframe.style.opacity = '1';
-            }, 1000);
-    
+            const planResponse = await callApi('agent_planner', [], `Create a plan for: ${prompt}`);
+            const { files } = JSON.parse(planResponse.data);
+            
+            if (!files || files.length === 0) {
+                throw new Error("AI did not return a valid file plan.");
+            }
+
+            files.forEach(fileName => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.id = `file-${fileName.replace('.', '-')}`; // Handle dots in IDs
+                fileItem.textContent = fileName;
+                fileListContainer.appendChild(fileItem);
+            });
+
+            let generatedFiles = {};
+            for (const fileName of files) {
+                const fileItem = document.getElementById(`file-${fileName.replace('.', '-')}`);
+                fileItem.classList.add('generating');
+                buildStatus.textContent = `Generating ${fileName}...`;
+
+                const context = `User's Goal: "${prompt}".\n\nPreviously generated files:\n${JSON.stringify(generatedFiles, null, 2)}\n\nGenerate the code ONLY for the file: ${fileName}`;
+                
+                const codeResponse = await callApi('agent_executor', [], context);
+                const code = codeResponse.data;
+
+                generatedFiles[fileName] = code;
+                fileItem.classList.remove('generating');
+                fileItem.classList.add('completed');
+                
+                updatePreview(generatedFiles);
+            }
+
+            buildStatus.textContent = 'Build complete!';
+            createDownloadButtons(generatedFiles);
+
         } catch (error) {
-            console.error("Agent mode error:", error);
-            agentLogConsole.innerHTML = `<div class='log-line'><span class='tag'>[ ERROR ]</span> Gagal mem-build, coba lagi.</div>`;
+            console.error("Build process failed:", error);
+            buildStatus.textContent = 'Build failed. Please try again.';
         } finally {
+            isBuilding = false;
             generateBtn.disabled = false;
         }
     }
 
-    // --- Fungsi Helper untuk API dan Tampilan ---
-    async function callApi(mode, history) {
+    // --- Fungsi Helper untuk Builder ---
+    function updatePreview(files) {
+        const html = files['index.html'] || '';
+        const css = files['style.css'] || '';
+        const js = files['script.js'] || files['app.js'] || '';
+        
+        const srcDoc = `<!DOCTYPE html><html><head><style>${css}</style></head><body>${html}<script>${js}<\/script></body></html>`;
+        livePreviewIframe.srcdoc = srcDoc;
+    }
+
+    function createDownloadButtons(files) {
+        downloadSection.innerHTML = ''; // Clear previous buttons
+        for (const fileName in files) {
+            const link = document.createElement('a');
+            const blob = new Blob([files[fileName]], { type: 'text/plain;charset=utf-8' });
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            link.className = 'download-link';
+            link.textContent = `Download ${fileName}`;
+            downloadSection.appendChild(link);
+        }
+    }
+
+    // --- Fungsi API Call, Tampilan Pesan, dan History ---
+    async function callApi(mode, history, context = null) {
+        const body = { history, model: currentModel, mode, context };
         const response = await fetch('/api/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            signal: abortController ? abortController.signal : null,
-            body: JSON.stringify({ history, model: currentModel, mode })
+            signal: (mode === 'chat') ? abortController?.signal : null,
+            body: JSON.stringify(body)
         });
-
         if (!response.ok) {
             const errorBody = await response.json();
             throw new Error(errorBody.error || `HTTP error! status: ${response.status}`);
@@ -338,13 +259,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const userParts = [];
         const imageUrl = attachedFile ? `data:${attachedFile.mimeType};base64,${attachedFile.base64}` : null;
-        if (attachedFile) {
-            userParts.push({ inlineData: { mimeType: attachedFile.mimeType, data: attachedFile.base64 } });
-        }
-        if (prompt) {
-            userParts.push({ text: prompt });
-        }
-        
+        if (attachedFile) userParts.push({ inlineData: { mimeType: attachedFile.mimeType, data: attachedFile.base64 } });
+        if (prompt) userParts.push({ text: prompt });
         appendMessage('user', prompt, imageUrl);
         allChats[currentChatId].push({ role: 'user', parts: userParts });
     }
@@ -359,67 +275,27 @@ document.addEventListener("DOMContentLoaded", () => {
     function appendMessage(role, text, imageUrl = null) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${role === 'user' ? 'user' : 'ai'}`;
-        
-        if (imageUrl) {
-            const img = document.createElement('img');
-            img.src = imageUrl;
-            img.alt = "Lampiran";
-            messageDiv.appendChild(img);
-        }
-
+        if (imageUrl) { const img = document.createElement('img'); img.src = imageUrl; img.alt = "Lampiran"; messageDiv.appendChild(img); }
         if (text) {
             const contentContainer = document.createElement('div');
-            if (role !== 'user' && window.marked) {
-                contentContainer.innerHTML = marked.parse(text);
-            } else {
-                contentContainer.textContent = text;
-            }
+            contentContainer.innerHTML = (role !== 'user' && window.marked) ? marked.parse(text) : text;
             messageDiv.appendChild(contentContainer);
         }
-        
-        chatContainer.appendChild(messageDiv);
+        chatContainer.appendChild(contentContainer);
         scrollToBottom();
     }
     
     function appendLoadingIndicator() {
         const loadingDiv = document.createElement('div');
         loadingDiv.className = 'message ai loading-indicator';
-        const loadingPhrases = ["Tunggu sebentar...", "Alfhaiz sedang berfikir...", "Menyusun jawaban..."];
-        loadingDiv.innerHTML = `<div class="gemini-loader"></div><span class="loading-text">${loadingPhrases[0]}</span>`;
+        loadingDiv.innerHTML = `<div class="gemini-loader"></div><span class="loading-text">Thinking...</span>`;
         chatContainer.appendChild(loadingDiv);
         scrollToBottom();
-        
-        let phraseIndex = 1;
-        const textInterval = setInterval(() => {
-            const loadingText = loadingDiv.querySelector('.loading-text');
-            if(loadingText) loadingText.textContent = loadingPhrases[phraseIndex % loadingPhrases.length];
-            phraseIndex++;
-        }, 2500);
-
-        // Return the element so it can be removed
         return loadingDiv;
     }
-    
-    // --- Fungsi Sistem History Chat ---
-    newChatBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        currentChatId = null;
-        clearChatScreen();
-        if (body.classList.contains("sidebar-open")) {
-            body.classList.remove("sidebar-open");
-        }
-        setActiveHistoryItem(null);
-    });
 
-    function clearChatScreen() {
-        chatContainer.innerHTML = ''; // Clear all messages and indicators
-        welcomeScreen.style.display = 'block';
-        clearAttachment();
-        document.querySelectorAll('#history-container .nav-item').forEach(item => item.classList.remove('active'));
-    }
-    
     function displayAttachmentPreview(fileName, dataUrl) {
-        attachmentPreview.innerHTML = `<div class="preview-item">${dataUrl.startsWith('data:image')?`<img src="${dataUrl}" alt="Preview">`:''}<span>${fileName}</span><button class="remove-attachment-btn" id="remove-attachment-btn">&times;</button></div>`;
+        attachmentPreview.innerHTML = `<div class="preview-item">${dataUrl.startsWith('data:image') ? `<img src="${dataUrl}" alt="Preview">`: ''}<span>${fileName}</span><button class="remove-attachment-btn" id="remove-attachment-btn">&times;</button></div>`;
         document.getElementById('remove-attachment-btn').addEventListener('click', clearAttachment);
     }
     
@@ -429,16 +305,29 @@ document.addEventListener("DOMContentLoaded", () => {
         attachmentPreview.innerHTML = '';
     }
 
+    newChatBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        currentChatId = null;
+        clearChatScreen();
+        if (body.classList.contains("sidebar-open")) body.classList.remove("sidebar-open");
+        setActiveHistoryItem(null);
+    });
+
+    function clearChatScreen() {
+        chatContainer.innerHTML = '';
+        chatContainer.appendChild(welcomeScreen);
+        welcomeScreen.style.display = 'block';
+        clearAttachment();
+        document.querySelectorAll('#history-container .nav-item').forEach(item => item.classList.remove('active'));
+    }
+
     function createHistoryItem(chatId, prompt) {
         const historyItem = document.createElement('a');
         historyItem.href = '#';
         historyItem.className = 'nav-item';
         historyItem.dataset.chatId = chatId;
-        historyItem.innerHTML = `<svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.01L3 11v2h18zM3 16h12v2H3zM21 6H3v2.01L21 8z"></path></svg><span>${prompt.substring(0, 20) + (prompt.length > 20 ? '...' : '')}</span>`;
-        historyItem.addEventListener('click', (e) => {
-            e.preventDefault();
-            loadChatHistory(chatId);
-        });
+        historyItem.innerHTML = `<svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.01L3 11v2h18zM3 16h12v2H3zM21 6H3v2.01L21 8z"></path></svg><span>${prompt.substring(0,20) + (prompt.length > 20 ? '...' : '')}</span>`;
+        historyItem.addEventListener('click', (e) => { e.preventDefault(); loadChatHistory(chatId); });
         historyContainer.prepend(historyItem);
         setActiveHistoryItem(chatId);
     }
@@ -459,11 +348,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setActiveHistoryItem(chatId) {
         document.querySelectorAll('#history-container .nav-item').forEach(item => {
-            if (item.dataset.chatId === chatId) {
-                item.classList.add('active');
-            } else {
-                item.classList.remove('active');
-            }
+            if (item.dataset.chatId === chatId) item.classList.add('active');
+            else item.classList.remove('active');
         });
         if (chatId) {
             newChatBtn.classList.remove('active');
