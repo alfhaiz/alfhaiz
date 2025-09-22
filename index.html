@@ -12,7 +12,7 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- SIDEBAR (Tidak ada perubahan) -->
+        <!-- SIDEBAR -->
         <aside class="sidebar">
             <div class="sidebar-header"><div class="logo">ALFHAIZ</div></div>
             <nav class="sidebar-nav">
@@ -36,14 +36,25 @@
             </header>
             
             <div class="chat-container" id="chat-container">
-                <!-- DIUBAH: Kontainer pratinjau sekarang berisi log dan iframe -->
-                <div class="live-preview-container" id="live-preview-container">
-                    <div class="agent-log-console" id="agent-log-console"></div>
-                    <iframe id="live-preview-iframe" sandbox="allow-scripts" loading="lazy"></iframe>
-                </div>
                 <div class="welcome-screen" id="welcome-screen">
                     <h1>Welcome to Alfhaiz</h1>
                     <p>Artificial Intelligence Assistant For You</p>
+                </div>
+                 <!-- Pesan-pesan chat akan ditambahkan di sini oleh JavaScript -->
+            </div>
+
+            <!-- KONTENER PROGRESS PROYEK BARU -->
+            <div class="task-progress-container" id="task-progress-container">
+                <div class="progress-header" id="progress-header">
+                    <h4>Progress Proyek</h4>
+                    <button id="toggle-progress-btn">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>
+                    </button>
+                </div>
+                <div class="progress-body" id="progress-body">
+                    <ul id="task-list">
+                        <!-- Task items akan di-generate oleh JavaScript -->
+                    </ul>
                 </div>
             </div>
 
