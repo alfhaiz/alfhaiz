@@ -8,6 +8,6 @@
     "start": "echo \"No start script needed for static files, Vercel handles API routing.\" && exit 0"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.1.3"
+    "@google/generative-ai": "^0.11.1"
   }
 }
