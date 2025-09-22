@@ -1,3 +1,4 @@
+/* ... (SEMUA KODE CSS DARI AWAL HINGGA .input-area-container TETAP SAMA) ... */
 :root {
     --bg-main: #FFFFFF;
     --bg-sidebar: #F9FAFB;
@@ -59,12 +60,27 @@ body { font-family: var(--font-family); background-color: var(--bg-main); color:
 .message.ai { align-self: flex-start; animation: smoothFadeInUp 0.7s ease-out forwards; }
 .message.user { align-self: flex-end; display: flex; flex-direction: column; align-items: flex-end; }
 .message img { max-width: 100%; border-radius: 8px; margin-bottom: 8px; }
-.loading-indicator { align-self: flex-start; display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.loading-indicator { 
+    align-self: flex-start; 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    padding: 10px 0; 
+    width: 100%; 
+    justify-content: space-between;
+}
+.loading-indicator-main { display: flex; align-items: center; gap: 12px; }
 .gemini-loader { position: relative; width: 24px; height: 24px; animation: spin 2s linear infinite; }
 .gemini-loader::before, .gemini-loader::after { content: ''; position: absolute; top: 50%; left: 50%; width: 100%; height: 2px; background: conic-gradient(from var(--angle), #d8b4fe, #f472b6, #f87171, #facc15, #a3e635, #4ade80, #67e8f9, #a5b4fc, #d8b4fe); animation: rgb-border-flow 3s linear infinite; transform-origin: center; }
 .gemini-loader::before { transform: translate(-50%, -50%) rotate(45deg); }
 .gemini-loader::after { transform: translate(-50%, -50%) rotate(-45deg); }
 .loading-text { font-size: 14px; color: var(--text-secondary); font-style: italic; }
+/* BARU: Styling untuk Timer */
+.loading-timer { 
+    font-size: 12px; 
+    color: var(--text-secondary); 
+    font-family: 'Courier New', Courier, monospace;
+}
 @property --angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 @keyframes rgb-border-flow { from { --angle: 0deg; } to { --angle: 360deg; } }
 .input-area-container { padding: 8px 16px 24px; flex-shrink: 0; }
@@ -93,7 +109,7 @@ textarea::placeholder { color: var(--text-secondary); }
 .generate-btn.generating .stop-text, .generate-btn.generating .stop-timer { display: inline; }
 .generate-btn.generating { background-color: #DC2626; }
 
-/* --- Modal & Notifikasi --- */
+/* ... (Kode CSS untuk .modal-overlay, .file-menu, dll. TETAP SAMA) ... */
 .modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
 .modal-overlay.active { opacity: 1; visibility: visible; }
 .modal-content { background: var(--bg-main); padding: 24px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; transform: scale(0.95); transition: transform 0.3s ease; }
@@ -107,8 +123,6 @@ textarea::placeholder { color: var(--text-secondary); }
 .new-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 50px; background: linear-gradient(90deg, #4ade80, #34d399); color: white; text-transform: uppercase; }
 .notification-toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background-color: var(--text-primary); color: white; padding: 12px 20px; border-radius: 50px; font-weight: 500; z-index: 3000; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: top 0.4s ease-in-out; }
 .notification-toast.show { top: 20px; }
-
-/* --- Gaya Lampiran & Suara (Tidak Berubah) --- */
 .file-menu-container { position: relative; }
 .file-popup-menu { position: absolute; bottom: calc(100% + 10px); right: 0; display: flex; flex-direction: column; gap: 8px; background-color: var(--bg-main); padding: 8px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid var(--border-color); opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.2s ease; z-index: 10; }
 .file-popup-menu.active { opacity: 1; visibility: visible; transform: translateY(0); }
@@ -132,16 +146,23 @@ textarea::placeholder { color: var(--text-secondary); }
 .dark-mode .message .voice-message-container { background-color: #374151; }
 .message.user .voice-message-container { background-color: #6366F1; color: white; }
 
-/* --- BARU: Gaya Panel Progress Proyek --- */
+/* --- UPDATE: Gaya Panel Progress Proyek --- */
 .task-progress-container {
     margin: 0 16px 8px;
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color); /* Ubah ketebalan border */
     border-radius: 16px;
     background-color: var(--bg-main);
     overflow: hidden;
     flex-shrink: 0;
-    display: none; /* Awalnya disembunyikan oleh JS */
+    display: none;
     transition: all 0.4s ease;
+}
+/* BARU: Styling RGB Border saat aktif */
+.task-progress-container.project-active {
+    border-color: transparent;
+    background: linear-gradient(var(--bg-main), var(--bg-main)) padding-box, 
+                conic-gradient(from var(--angle), #d8b4fe, #f472b6, #f87171, #facc15, #a3e635, #4ade80, #67e8f9, #a5b4fc, #d8b4fe) border-box;
+    animation: rgb-border-flow 3s linear infinite;
 }
 .progress-header {
     display: flex;
@@ -170,59 +191,80 @@ textarea::placeholder { color: var(--text-secondary); }
     opacity: 0;
 }
 #task-list { list-style: none; }
-.task-item {
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border-color);
-    opacity: 0.5;
-    transition: opacity 0.4s ease;
-}
+.task-item { padding: 12px 0; border-bottom: 1px solid var(--border-color); opacity: 0.5; transition: opacity 0.4s ease; }
 .task-item:last-child { border-bottom: none; }
 .task-item-title { display: flex; align-items: center; font-weight: 500; font-size: 14px; }
-.task-status-icon {
-    width: 20px;
-    height: 20px;
-    margin-right: 12px;
-    border-radius: 50%;
-    border: 2px solid var(--text-secondary);
-    transition: all 0.3s ease;
+.task-status-icon { width: 20px; height: 20px; margin-right: 12px; border-radius: 50%; border: 2px solid var(--text-secondary); transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.task-item.in-progress { opacity: 1; }
+.task-item.in-progress .task-status-icon { border-color: var(--accent-color); animation: spin 1.5s linear infinite; }
+.task-item.completed { opacity: 1; }
+.task-item.completed .task-status-icon { background-color: #34D399; border-color: #34D399; color: white; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-size: 14px; background-repeat: no-repeat; background-position: center; }
+.task-item.completed .task-item-title { color: var(--text-secondary); text-decoration: line-through; }
+.task-item-description { font-size: 13px; color: var(--text-secondary); padding-left: 32px; margin-top: 4px; display: none; }
+.task-item.completed .task-item-description { display: block; }
+
+
+/* BARU: Gaya Modal Preview & Tombol Download */
+.preview-modal-content {
+    background: var(--bg-main);
+    padding: 0;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    width: 90%;
+    max-width: 1024px;
+    height: 80vh;
     display: flex;
+    flex-direction: column;
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+.modal-overlay.active .preview-modal-content { transform: scale(1); }
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border-color);
     flex-shrink: 0;
 }
-.task-item.in-progress {
-    opacity: 1;
-}
-.task-item.in-progress .task-status-icon {
-    border-color: var(--accent-color);
-    animation: spin 1.5s linear infinite;
-}
-.task-item.completed {
-    opacity: 1;
-}
-.task-item.completed .task-status-icon {
-    background-color: #34D399;
-    border-color: #34D399;
-    color: white;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
-    background-size: 14px;
-    background-repeat: no-repeat;
-    background-position: center;
-}
-.task-item.completed .task-item-title {
+.preview-header h3 { font-size: 16px; font-weight: 600; }
+#close-preview-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
     color: var(--text-secondary);
-    text-decoration: line-through;
+    line-height: 1;
 }
-.task-item-description {
-    font-size: 13px;
-    color: var(--text-secondary);
-    padding-left: 32px;
-    margin-top: 4px;
-    display: none;
+
+#preview-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    flex-grow: 1;
 }
-.task-item.completed .task-item-description {
-    display: block;
+.file-downloads {
+    margin-top: 16px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
 }
+.download-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--border-color);
+    color: var(--text-primary);
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+.dark-mode .download-link { background-color: #374151; }
+.download-link:hover { background-color: var(--accent-color); color: white; }
 
 
 /* --- Keyframes & Animasi --- */

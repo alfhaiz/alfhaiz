@@ -2,7 +2,8 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- PERUBAHAN: Mencegah zoom di mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
     <title>Alfhaiz AI</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,7 +13,7 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- SIDEBAR -->
+        <!-- SIDEBAR (Tidak ada perubahan) -->
         <aside class="sidebar">
             <div class="sidebar-header"><div class="logo">ALFHAIZ</div></div>
             <nav class="sidebar-nav">
@@ -40,25 +41,22 @@
                     <h1>Welcome to Alfhaiz</h1>
                     <p>Artificial Intelligence Assistant For You</p>
                 </div>
-                 <!-- Pesan-pesan chat akan ditambahkan di sini oleh JavaScript -->
             </div>
 
-            <!-- KONTENER PROGRESS PROYEK BARU -->
             <div class="task-progress-container" id="task-progress-container">
                 <div class="progress-header" id="progress-header">
-                    <h4>Progress Proyek</h4>
+                    <h4>Alfhaiz Computer - Building...</h4>
                     <button id="toggle-progress-btn">
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>
                     </button>
                 </div>
                 <div class="progress-body" id="progress-body">
-                    <ul id="task-list">
-                        <!-- Task items akan di-generate oleh JavaScript -->
-                    </ul>
+                    <ul id="task-list"></ul>
                 </div>
             </div>
 
             <footer class="input-area-container">
+                <!-- ... (Konten footer tidak berubah) ... -->
                 <div class="attachment-preview" id="attachment-preview"></div>
                 <div class="voice-recorder-ui" id="voice-recorder-ui">
                     <div class="recorder-status"><div class="blinking-dot"></div><div class="waveform-visualizer" id="waveform-visualizer"></div><span class="timer" id="recorder-timer">00:00</span></div>
@@ -91,12 +89,24 @@
         <div class="sidebar-overlay" id="sidebar-overlay"></div>
     </div>
     
+    <!-- MODAL MODEL (Tidak ada perubahan) -->
     <div class="modal-overlay" id="model-modal">
         <div class="modal-content">
-            <h3>Pilih Model</h3>
+             <h3>Pilih Model</h3>
             <div class="model-option" data-model="gemini-2.0-flash-lite" data-display-name="qwen 2.5 lite"><h4>qwen 2.5 lite<span class="new-badge">New</span></h4><p>Model paling ringan dan hemat biaya, cocok untuk tugas-tugas bervolume tinggi.</p></div>
             <div class="model-option selected" data-model="gemini-2.0-flash" data-display-name="qwen 2.5 smart"><h4>qwen 2.5 smart<span class="new-badge">New</span></h4><p>Model seimbang dengan performa hebat di semua tugas. Pilihan default terbaik.</p></div>
             <div class="model-option" data-model="gemini-2.5-flash" data-display-name="qwen 3.5 plus"><h4>qwen 3.5 plus<span class="new-badge">New</span></h4><p>Model hybrid reasoning yang kuat dengan kemampuan berpikir dan konteks yang luas.</p></div>
+        </div>
+    </div>
+
+    <!-- BARU: Modal untuk Preview Website -->
+    <div class="modal-overlay" id="preview-modal">
+        <div class="preview-modal-content">
+            <div class="preview-header">
+                <h3>Project Preview</h3>
+                <button id="close-preview-btn">&times;</button>
+            </div>
+            <iframe id="preview-iframe" sandbox="allow-scripts"></iframe>
         </div>
     </div>
 
