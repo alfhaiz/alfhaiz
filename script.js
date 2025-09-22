@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Bagian 2: State Aplikasi ---
     let allChats = {};
     let currentChatId = null;
-    let currentModel = 'gemini-1.5-flash-latest'; // Update ke model yang lebih baru
+    let currentModel = 'gemini-2.5-flash'; // Update ke model yang lebih baru
     let attachedFile = null;
     let isAgentMode = false;
     let isProjectActive = false; // State baru untuk melacak proyek
