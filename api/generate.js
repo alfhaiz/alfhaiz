@@ -2,21 +2,19 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Konfigurasi untuk mode Chat Biasa
-const chatGenerationConfig = {
-  temperature: 0.7,
-  topP: 1,
-  topK: 1,
-  maxOutputTokens: 8192,
-};
-
-// Konfigurasi KHUSUS untuk Mode Proyek (Manus AI) dengan JSON Mode AKTIF
 const agentGenerationConfig = {
   temperature: 0.5,
   topP: 1,
   topK: 1,
   maxOutputTokens: 8192,
   response_mime_type: "application/json", 
+};
+
+const chatGenerationConfig = {
+  temperature: 0.7,
+  topP: 1,
+  topK: 1,
+  maxOutputTokens: 8192,
 };
 
 const safetySettings = [
@@ -28,13 +26,45 @@ const safetySettings = [
 
 const SYSTEM_INSTRUCTIONS = {
     chat: `Kamu adalah Alfhaiz, asisten AI yang sangat ramah, cerdas, dan membantu.
-            - SELALU gunakan emoji yang relevan di setiap respon 😊.
+            - SELALU gunakan emoji yang relevan di setiap respon .
             - Jawabanmu harus terstruktur dengan baik menggunakan Markdown.
-            - Jaga agar jawaban tetap positif dan bersemangat! ✨`,
+            - Jaga agar jawaban tetap positif dan bersemangat! `,
     
-    manus_planner: `Buatlah rencana proyek dalam format JSON berdasarkan permintaan pengguna. JSON harus memiliki kunci "project_plan" yang berisi array dari 5 objek, di mana setiap objek memiliki kunci "title" dan "description". Judulnya harus: "Riset, Desain, dan Teknologi", "Membuat Struktur Website", "Implementasi Fitur", "Deploy Website ke Internet", "Menyampaikan Hasil ke Pengguna".`,
+    // PERUBAHAN BESAR: Alur kerja Alfhaiz Computer
+    manus_planner: `Anda adalah 'Alfhaiz Computer', sebuah AI yang membangun aplikasi web.
+            Tugas Anda: Ubah permintaan pengguna menjadi rencana proyek teknis.
+            PERINTAH:
+            1. HANYA output JSON. TANPA teks lain.
+            2. JSON harus berisi kunci "project_plan" dengan array objek.
+            3. Setiap objek harus punya "title" dan "description".
+            4. Buat langkah-langkah yang logis seperti: "Booting System & Membuat Folder Proyek", "Membuat file index.html", "Membuat file style.css", "Membuat file app.js", dan "Menyelesaikan Proyek & Kompilasi File".
+            CONTOH PERMINTAAN: "buatkan website counter sederhana"
+            CONTOH OUTPUT ANDA:
+            {
+              "project_plan": [
+                { "title": "Booting System & Membuat Folder Proyek", "description": "Menyiapkan lingkungan kerja dan struktur folder." },
+                { "title": "Membuat file index.html", "description": "Menulis struktur HTML untuk tombol dan display." },
+                { "title": "Membuat file style.css", "description": "Menambahkan styling agar tampilan menarik." },
+                { "title": "Membuat file app.js", "description": "Menulis logika JavaScript untuk fungsi counter." },
+                { "title": "Menyelesaikan Proyek & Kompilasi File", "description": "Menggabungkan semua file dan menyiapkan untuk diunduh." }
+              ]
+            }`,
             
-    manus_executor: `Kerjakan tugas yang diberikan dan laporkan hasilnya dalam format JSON. JSON harus memiliki dua kunci: "summary" (string singkat) dan "chat_message" (string detail untuk chat, boleh pakai Markdown dan emoji ✅).`
+    manus_executor: `Anda adalah 'Alfhaiz Computer'. Anda sedang mengerjakan sebuah tugas.
+            PERINTAH:
+            1. HANYA output JSON. TANPA teks lain.
+            2. Jika tugasnya adalah 'Menyelesaikan Proyek', JSON HARUS berisi kunci "final_project_files" yang berisi objek dengan nama file sebagai kunci dan kode sebagai string.
+            3. Untuk tugas lain, JSON harus berisi "summary" (hasil kerja) dan "chat_message" (laporan ke user). Jika tugasnya membuat file, sertakan kodenya dalam chat_message menggunakan markdown.
+            CONTOH OUTPUT TUGAS AKHIR:
+            {
+                "summary": "Semua file telah dibuat dan dikompilasi.",
+                "chat_message": "Proyek telah selesai!  Berikut adalah file yang bisa Anda unduh. Anda juga bisa melihat pratinjaunya.",
+                "final_project_files": {
+                    "index.html": "<!DOCTYPE html>...",
+                    "style.css": "body { ... }",
+                    "app.js": "const counter = 0;"
+                }
+            }`
 };
 
 export default async function handler(req, res) {
