@@ -78,7 +78,7 @@ export default async function handler(req, res) {
         const systemInstruction = SYSTEM_INSTRUCTIONS[mode] || SYSTEM_INSTRUCTIONS['chat'];
 
         const generativeModel = genAI.getGenerativeModel({ 
-            model: model || "gemini-1.5-flash", // Menggunakan model yang lebih baru untuk hasil JSON yang lebih baik
+            model: model || "gemini-2.5-flash", // Menggunakan model yang lebih baru untuk hasil JSON yang lebih baik
             systemInstruction: {
                 role: "model",
                 parts: [{ text: systemInstruction }]
@@ -119,4 +119,5 @@ export default async function handler(req, res) {
         console.error('Error calling Gemini API:', error);
         return res.status(500).json({ error: 'Failed to get response from AI.' });
     }
+
 }
