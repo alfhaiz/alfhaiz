@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let allChats = {};
     let currentChatId = null;
     // Menggunakan model Gemini terbaru
-    let currentModel = 'gemini-1.5-pro-latest'; 
+    let currentModel = 'gemini-2.5-flash'; 
     let attachedFile = null;
     let isRecording = false;
     let recognition;
