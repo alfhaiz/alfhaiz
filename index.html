@@ -5,9 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alfhaiz AI</title>
 
-    <!-- ===== CUKUP TAMBAHKAN SATU BARIS INI UNTUK FAVICON ===== -->
-    <link rel="icon" href="logo.png" type="image/png">
+    <!-- ===== PENGATURAN UNTUK PWA (PROGRESSIVE WEB APP) ===== -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f0f4f8" />
+    <link rel="apple-touch-icon" href="logo192.png"> <!-- Ikon untuk iPhone/iPad -->
     <!-- ======================================================= -->
+
+    <!-- ===== FAVICON ANDA ===== -->
+    <link rel="icon" href="logo.png" type="image/png">
+    <!-- ========================== -->
 
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -58,7 +64,6 @@
                 </div>
 
                 <div class="input-wrapper" id="input-wrapper">
-                    <!-- STRUKTUR INPUT DIPERBAIKI -->
                     <div class="textarea-container">
                         <textarea id="chat-input" placeholder="Ask me anything..." rows="1"></textarea>
                     </div>
@@ -94,5 +99,21 @@
     <div class="notification-toast" id="notification-toast"></div>
     <input type="file" id="file-input" style="display: none;" accept="*/*" />
     <script src="script.js"></script>
+
+    <!-- ===== SCRIPT UNTUK MENDAFTARKAN SERVICE WORKER PWA ===== -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker pendaftaran berhasil, scope: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker pendaftaran gagal: ', err);
+                    });
+            });
+        }
+    </script>
+    <!-- ======================================================= -->
 </body>
 </html>
