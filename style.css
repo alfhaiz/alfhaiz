@@ -163,7 +163,7 @@ textarea::placeholder { color: var(--text-secondary); }
 }
 
 .logo-img {
-    width: 32px;  /* Atur ukuran logo di sidebar */
+    width: 42px;  /* Atur ukuran logo di sidebar */
     height: 32px;
     flex-shrink: 0;
 }
@@ -177,7 +177,7 @@ textarea::placeholder { color: var(--text-secondary); }
 
 /* Logo di Welcome Screen */
 .welcome-logo {
-    width: 80px; /* Atur ukuran logo di welcome screen (lebih besar) */
+    width: 100px; /* Atur ukuran logo di welcome screen (lebih besar) */
     height: 80px;
     margin-bottom: 24px; /* Memberi jarak ke tulisan di bawahnya */
     animation: fadeIn 0.8s ease;
