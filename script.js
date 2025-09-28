@@ -57,13 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
                  if (event.results[i].isFinal) finalTranscript = event.results[i][0].transcript + finalTranscript;
                  else interimTranscript = event.results[i][0].transcript + interimTranscript;
             }
-            // Update input value with combined transcript
             chatInput.value = finalTranscript + interimTranscript;
-            // Optionally, if you want to immediately send when final is detected
-            // if (finalTranscript) {
-            //     // You might want to debounce this or add a confirmation
-            //     // handleSendMessage(); 
-            // }
         };
         recognition.onend = () => {
             isRecording = false;
@@ -98,32 +92,27 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // --- Logika Dark Mode ---
+    const lightIconSVG = `<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>`;
+    const darkIconSVG = `<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>`;
+
+    const applyTheme = (theme) => {
+        if (theme === 'dark') {
+            body.classList.add('dark-mode');
+            if (darkModeIcon) darkModeIcon.innerHTML = lightIconSVG; // Show sun icon in dark mode
+        } else {
+            body.classList.remove('dark-mode');
+            if (darkModeIcon) darkModeIcon.innerHTML = darkIconSVG; // Show moon icon in light mode
+        }
+    };
+
     const currentTheme = localStorage.getItem('theme') || 'light';
-    if (currentTheme === 'dark') {
-        body.classList.add('dark-mode');
-        if (darkModeIcon) {
-            darkModeIcon.setAttribute('d', 'M12 2.75a9.25 9.25 0 100 18.5 9.25 9.25 0 000-18.5zM12 4.25a7.75 7.75 0 100 15.5 7.75 7.75 0 000-15.5zM12 6a6 6 0 00-6 6h12a6 6 0 00-6-6z');
-        }
-    } else {
-        if (darkModeIcon) {
-            darkModeIcon.setAttribute('d', 'M12 2a1 1 0 011 1v2a1 1 0 11-2 0V3a1 1 0 011-1zm0 18a1 1 0 01-1 1v2a1 1 0 112 0v-2a1 1 0 01-1-1zm6.36-14.86a1 1 0 01-.71-.29l-1.41-1.41a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zm-12.72 12.72a1 1 0 01-.71-.29l-1.41-1.41a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zm-2.83-8.48a1 1 0 01-.71-.29L3.51 9.07a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zm12.72 12.72a1 1 0 01-.71-.29l-1.41-1.41a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6z');
-        }
-    }
+    applyTheme(currentTheme);
 
     if (darkModeToggle) {
         darkModeToggle.addEventListener('click', () => {
-            body.classList.toggle('dark-mode');
-            if (body.classList.contains('dark-mode')) {
-                localStorage.setItem('theme', 'dark');
-                if (darkModeIcon) {
-                    darkModeIcon.setAttribute('d', 'M12 2.75a9.25 9.25 0 100 18.5 9.25 9.25 0 000-18.5zM12 4.25a7.75 7.75 0 100 15.5 7.75 7.75 0 000-15.5zM12 6a6 6 0 00-6 6h12a6 6 0 00-6-6z');
-                }
-            } else {
-                localStorage.setItem('theme', 'light');
-                if (darkModeIcon) {
-                    darkModeIcon.setAttribute('d', 'M12 2a1 1 0 011 1v2a1 1 0 11-2 0V3a1 1 0 011-1zm0 18a1 1 0 01-1 1v2a1 1 0 112 0v-2a1 1 0 01-1-1zm6.36-14.86a1 1 0 01-.71-.29l-1.41-1.41a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zm-12.72 12.72a1 1 0 01-.71-.29l-1.41-1.41a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zm-2.83-8.48a1 1 0 01-.71-.29L3.51 9.07a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zm12.72 12.72a1 1 0 01-.71-.29l-1.41-1.41a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6z');
-                }
-            }
+            const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
         });
     }
 
@@ -166,12 +155,12 @@ document.addEventListener("DOMContentLoaded", () => {
         chatInput.value = '';
         voiceRecorderUI.style.display = 'none';
         inputWrapper.style.display = 'flex';
-        if(isRecording) recognition.stop(); // Stop recognition if still running
+        if(isRecording) recognition.stop();
     });
     if (sendVoiceBtn) sendVoiceBtn.addEventListener('click', () => {
         voiceRecorderUI.style.display = 'none';
         inputWrapper.style.display = 'flex';
-        if(isRecording) recognition.stop(); // Stop recognition before sending
+        if(isRecording) recognition.stop();
         handleSendMessage();
     });
     if (modelSelectorBtn) modelSelectorBtn.addEventListener('click', (e) => {
@@ -218,15 +207,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (fileInput) fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (!file) return;
-
-        // Batasan ukuran file (misalnya 5MB)
-        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+        const MAX_FILE_SIZE = 5 * 1024 * 1024;
         if (file.size > MAX_FILE_SIZE) {
             showNotification("Ukuran file maksimal adalah 5MB. 🚫", true);
-            fileInput.value = ''; // Reset input
+            fileInput.value = '';
             return;
         }
-
         const reader = new FileReader();
         reader.onloadend = () => {
             const dataUrl = reader.result;
@@ -262,7 +248,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!prompt && !attachedFile) return;
         if (welcomeScreen) welcomeScreen.style.display = 'none';
 
-        // Jika chat baru atau ID chat kosong, buat yang baru
         if (!currentChatId || !allChats[currentChatId]) {
             currentChatId = `chat_${Date.now()}`;
             allChats[currentChatId] = [];
@@ -274,7 +259,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (prompt) userParts.push({ text: prompt });
         
         appendMessage('user', prompt, attachedFile ? `data:${attachedFile.mimeType};base64,${attachedFile.base64}` : null);
-        // Simpan pesan pengguna ke riwayat chat
         allChats[currentChatId].push({ role: 'user', parts: userParts });
         
         chatInput.value = '';
@@ -289,7 +273,6 @@ document.addEventListener("DOMContentLoaded", () => {
             seconds++;
             if (generateBtn.querySelector('.stop-timer')) generateBtn.querySelector('.stop-timer').textContent = formatTime(seconds);
         }, 1000);
-        // Tombol stop akan memanggil abortController.abort()
         generateBtn.onclick = () => { 
             abortController.abort();
             showNotification("Generasi dihentikan. ⏸️");
@@ -308,15 +291,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const result = await response.json();
             
-            // Hapus indikator loading
             clearInterval(loadingState.intervalId);
             loadingState.element.remove();
 
             const aiMessage = result.data;
-            const sourceLinks = result.sources || []; // Pastikan ini array
+            const sourceLinks = result.sources || [];
 
             appendMessage('model', aiMessage, null, sourceLinks);
-            // Simpan respons AI ke riwayat chat, tanpa sumber untuk kesederhanaan struktur penyimpanan history
             allChats[currentChatId].push({ role: 'model', parts: [{ text: aiMessage }] });
 
         } catch (error) {
@@ -331,7 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } finally {
             generateBtn.classList.remove('generating');
             clearInterval(generationTimer);
-            generateBtn.onclick = handleSendMessage; // Reset onclick ke handleSendMessage
+            generateBtn.onclick = handleSendMessage;
         }
     };
 
@@ -359,7 +340,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (text) {
             const p = document.createElement('p');
             if (role !== 'user' && window.marked) {
-                // Gunakan marked.parse untuk markdown, tapi pastikan HTML escape
                 p.innerHTML = marked.parse(text); 
             } else {
                 p.textContent = text;
@@ -424,8 +404,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const text = message.parts.find(p => p.text)?.text || '';
             const imagePart = message.parts.find(p => p.inlineData);
             const imageUrl = imagePart ? `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}` : null;
-            // Catatan: Source links tidak disimpan di `allChats` saat ini,
-            // jadi tidak akan dimuat kembali dari history.
             appendMessage(message.role, text, imageUrl);
         });
         setActiveHistoryItem(chatId);
