@@ -141,3 +141,55 @@ textarea::placeholder { color: var(--text-secondary); }
 @keyframes gradient-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes smoothFadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+/* --- CSS UNTUK LOGO BARU --- */
+
+/* Logo di Sidebar */
+.sidebar-header {
+    padding: 8px; /* Menyesuaikan padding header */
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.logo-container:hover {
+    background-color: var(--border-color);
+}
+
+.logo-img {
+    width: 32px;  /* Atur ukuran logo di sidebar */
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.logo-text {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+}
+
+/* Logo di Welcome Screen */
+.welcome-logo {
+    width: 80px; /* Atur ukuran logo di welcome screen (lebih besar) */
+    height: 80px;
+    margin-bottom: 24px; /* Memberi jarak ke tulisan di bawahnya */
+    animation: fadeIn 0.8s ease;
+}
+
+/* Animasi sederhana untuk logo */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Menghapus div .logo lama jika masih ada */
+.sidebar-header .logo {
+    display: none;
+}
