@@ -198,3 +198,17 @@ textarea::placeholder { color: var(--text-secondary); }
 @keyframes gradient-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes smoothFadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+/* Style untuk initial nama user di sidebar */
+.user-initial {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #6366F1;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    flex-shrink: 0;
+}
