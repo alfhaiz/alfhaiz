@@ -19,7 +19,6 @@
     <div class="app-container">
         <!-- SIDEBAR -->
         <aside class="sidebar">
-            <!-- Teks nama website kembali seperti semula -->
             <div class="sidebar-header">
                 <div class="logo">ALFHAIZ</div>
             </div>
@@ -47,7 +46,6 @@
             
             <div class="chat-container" id="chat-container">
                 <div class="welcome-screen" id="welcome-screen">
-                    <!-- MODIFIKASI: Teks sapaan baru -->
                     <h1>Hii, <span class="gradient-text">User</span><br>I Can Help You?</h1>
                 </div>
             </div>
@@ -60,19 +58,21 @@
                 </div>
 
                 <div class="input-wrapper" id="input-wrapper">
-                    <div class="textarea-container"><textarea id="chat-input" placeholder="Ask me anything..." rows="1"></textarea></div>
+                    <!-- STRUKTUR INPUT DIPERBAIKI -->
+                    <div class="textarea-container">
+                        <textarea id="chat-input" placeholder="Ask me anything..." rows="1"></textarea>
+                    </div>
                     <div class="input-actions">
-                        <button class="action-btn" id="voice-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></svg></button>
+                        <button class="action-btn" id="voice-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
                         <div class="file-menu-container">
-                            <button class="action-btn" id="more-options-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg></button>
+                            <button class="action-btn" id="more-options-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
                             <div class="file-popup-menu" id="file-popup-menu">
                                 <button class="popup-option" id="attach-file-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg><span>File</span></button>
-                                <button class="popup-option" id="attach-camera-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></svg><span>Kamera</span></button>
+                                <button class="popup-option" id="attach-camera-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg><span>Kamera</span></button>
                             </div>
                         </div>
                         <button class="generate-btn" id="generate-btn">
-                            <span class="generate-text">Generate</span><svg class="generate-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H7v-2h4V7h2v4h4v2h-4v4h-2z"></path></svg>
-                            <span class="stop-text">Stop</span><span class="timer stop-timer">00:00</span>
+                            <svg class="generate-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M3.4 20.4l17.45-7.48a1 1 0 0 0 0-1.84L3.4 3.6a.993.993 0 0 0-1.39.91L2 9.12c0 .5.37.93.87.99L17 12 2.87 13.88c-.5.07-.87.5-.87 1l.01 4.61c0 .71.73 1.2 1.39.91z"></path></svg>
                         </button>
                     </div>
                 </div>
