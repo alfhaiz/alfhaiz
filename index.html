@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alfhaiz AI</title>
-    <!-- Favicon untuk browser tab dan hasil pencarian -->
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+    <!-- ===== CUKUP TAMBAHKAN SATU BARIS INI UNTUK FAVICON ===== -->
+    <link rel="icon" href="logo.png" type="image/png">
+    <!-- ======================================================= -->
+
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,6 +19,7 @@
     <div class="app-container">
         <!-- SIDEBAR -->
         <aside class="sidebar">
+            <!-- Teks nama website kembali seperti semula -->
             <div class="sidebar-header">
                 <div class="logo">ALFHAIZ</div>
             </div>
@@ -28,32 +32,29 @@
             <div class="sidebar-footer">
                 <a href="#" class="nav-item auth-button"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 00-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 002 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"></path></svg><span>Alfhaiz Developer</span></a>
                 <button class="nav-item" id="dark-mode-toggle">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path id="dark-mode-icon" d="M12 2a1 1 0 011 1v2a1 1 0 11-2 0V3a1 1 0 011-1zm0 18a1 1 0 01-1 1v2a1 1 0 112 0v-2a1 1 0 01-1-1zm6.36-14.86a1 1 0 01-.71-.29l-1.41-1.41a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zm-12.72 12.72a1 1 0 01-.71-.29l-1.41-1.41a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zm-2.83-8.48a1 1 0 01-.71-.29L3.51 9.07a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zm12.72 12.72a1 1 0 01-.71-.29l-1.41-1.41a1 1 0 011.41-1.41l1.41 1.41a1 1 0 01-.71 1.71zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6z"></path></svg><span>Dark Mode</span>
+                    <svg id="dark-mode-icon" class="nav-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+                    <span>Dark Mode</span>
                 </button>
             </div>
         </aside>
 
+        <!-- KONTEN UTAMA -->
         <main class="main-content">
             <header class="main-header">
-                <button class="menu-toggle" id="menu-toggle-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg></button>
+                <button class="menu-toggle" id="menu-toggle-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 5H3"/><path d="M15 12H3"/><path d="M17 19H3"/></svg></button>
                 <div class="model-selector" id="model-selector-btn">
                     <span id="model-display-name">qwen 2.5 smart</span>
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"></path></svg>
                 </div>
-                <button class="vip-btn"><span>VIP</span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3H5a2 2 0 00-2 2v2h20v-2a2 2 0 00-2-2z"></path></svg></button>
+                <button class="vip-btn"><span>VIP</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/></svg></button>
             </header>
             
             <div class="chat-container" id="chat-container">
                 <div class="welcome-screen" id="welcome-screen">
+                    <!-- Logo di welcome screen sudah dihapus -->
                     <h1>Welcome to Alfhaiz</h1>
                     <p>Artificial Intelligence Assistant For You</p>
                 </div>
-            </div>
-
-            <!-- Animasi Loading Gambar (dikontrol oleh JS) -->
-            <div class="image-loading-overlay" id="image-loading-overlay">
-                <div class="water-loader"></div>
-                <span>Creating your masterpiece...</span>
             </div>
 
             <footer class="input-area-container">
@@ -66,12 +67,12 @@
                 <div class="input-wrapper" id="input-wrapper">
                     <div class="textarea-container"><textarea id="chat-input" placeholder="Ask me anything..." rows="1"></textarea></div>
                     <div class="input-actions">
-                        <button class="action-btn" id="voice-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"></path></svg></button>
+                        <button class="action-btn" id="voice-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></svg></button>
                         <div class="file-menu-container">
                             <button class="action-btn" id="more-options-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg></button>
                             <div class="file-popup-menu" id="file-popup-menu">
-                                <button class="popup-option" id="attach-file-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z"></path></svg><span>File</span></button>
-                                <button class="popup-option" id="attach-camera-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm-2 4h4c1.1 0 2-.9 2-2v-1.09c.32-.11.63-.25.91-.42l1.5 1.5c.29.29.77.29 1.06 0l1.42-1.42c.29-.29.29-.77 0-1.06l-1.5-1.5c.17-.28.31-.59.42-.91H20c1.1 0 2-.9 2-2v-4c0-1.1-.9-2-2-2h-1.09c-.11-.32-.25-.63-.42-.91l1.5-1.5c-.29-.29-.29-.77 0-1.06L18.49.51c-.29-.29-.77-.29-1.06 0l-1.5 1.5c-.28-.17-.59-.31-.91-.42V1c0-.55-.45-1-1-1h-4c-.55 0-1 .45-1 1v1.09c-.32-.11-.63.25-.91-.42l-1.5-1.5c-.29-.29-.29-.77 0-1.06L.51 2.51c-.29.29-.29-.77 0 1.06l1.5 1.5c-.17-.28-.31-.59.42-.91H1c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1h1.09c.11.32.25.63.42.91l-1.5 1.5c-.29.29-.29-.77 0 1.06l1.42 1.42c.29.29.77.29 1.06 0l1.5-1.5c.28-.17.59.31.91-.42V19c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1.09c.32-.11.63-.25.91-.42l1.5 1.5c.29.29.77.29 1.06 0l1.42-1.42c.29-.29-.29-.77 0-1.06l-1.5-1.5c.17-.28.31-.59.42-.91H19c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1h-1.09c-.11-.32-.25-.63-.42-.91l1.5-1.5c.29-.29-.29-.77 0-1.06L18.49.51z"></path></svg><span>Kamera</span></button>
+                                <button class="popup-option" id="attach-file-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg><span>File</span></button>
+                                <button class="popup-option" id="attach-camera-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></svg><span>Kamera</span></button>
                             </div>
                         </div>
                         <button class="generate-btn" id="generate-btn">
@@ -92,11 +93,6 @@
             <div class="model-option" data-model="gemini-1.5-flash" data-display-name="qwen 2.5 lite"><h4>qwen 2.5 lite<span class="new-badge">New</span></h4><p>Model paling ringan dan hemat biaya, cocok untuk tugas-tugas bervolume tinggi.</p></div>
             <div class="model-option selected" data-model="gemini-2.0-flash" data-display-name="qwen 2.5 smart"><h4>qwen 2.5 smart<span class="new-badge">New</span></h4><p>Model seimbang dengan performa hebat di semua tugas. Pilihan default terbaik.</p></div>
             <div class="model-option" data-model="gemini-2.5-flash" data-display-name="qwen 3.5 plus"><h4>qwen 3.5 plus<span class="new-badge">New</span></h4><p>Model hybrid reasoning yang kuat dengan kemampuan berpikir dan konteks yang luas.</p></div>
-            <!-- Model Gambar Baru -->
-            <div class="model-option" data-model="gemini-2.5-flash-image-preview" data-display-name="qwen-imagen">
-                <h4>qwen-imagen<span class="new-badge">New</span></h4>
-                <p>Buat gambar fotorealistik dan artistik dari deskripsi teks Anda.</p>
-            </div>
         </div>
     </div>
 
