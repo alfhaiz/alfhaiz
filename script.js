@@ -29,14 +29,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const modelOptions = document.querySelectorAll('.model-option');
     const modelDisplayName = document.getElementById('model-display-name');
     const notificationToast = document.getElementById('notification-toast');
-    const darkModeToggle = document.getElementById('dark-mode-toggle');
-    const darkModeIcon = document.getElementById('dark-mode-icon');
+    // --- MODIFIKASI: HAPUS ELEMEN DARK MODE ---
+    // const darkModeToggle = document.getElementById('dark-mode-toggle');
+    // const darkModeIcon = document.getElementById('dark-mode-icon');
 
     // --- State Aplikasi ---
     let allChats = {};
     let currentChatId = null;
     // Menggunakan model Gemini terbaru
-    let currentModel = 'gemini-2.5-flash'; 
+    let currentModel = 'gemini-2.5-flash';
     let attachedFile = null;
     let isRecording = false;
     let recognition;
@@ -76,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
         if (voiceBtn) voiceBtn.disabled = true;
         console.warn("Speech Recognition tidak didukung di browser ini.");
-        showNotification("Rekaman Suara tidak didukung di browser ini. 🎤");
+        showNotification("Rekaman Suara tidak didukung di browser ini. ");
     }
     const formatTime = (seconds) => { const minutes = Math.floor(seconds / 60); const secs = seconds % 60; return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`; };
     const createVisualizerBars = () => {
@@ -91,30 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // --- Logika Dark Mode ---
-    const lightIconSVG = `<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>`;
-    const darkIconSVG = `<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>`;
-
-    const applyTheme = (theme) => {
-        if (theme === 'dark') {
-            body.classList.add('dark-mode');
-            if (darkModeIcon) darkModeIcon.innerHTML = lightIconSVG; // Show sun icon in dark mode
-        } else {
-            body.classList.remove('dark-mode');
-            if (darkModeIcon) darkModeIcon.innerHTML = darkIconSVG; // Show moon icon in light mode
-        }
-    };
-
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    applyTheme(currentTheme);
-
-    if (darkModeToggle) {
-        darkModeToggle.addEventListener('click', () => {
-            const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
-            localStorage.setItem('theme', newTheme);
-            applyTheme(newTheme);
-        });
-    }
+    // --- MODIFIKASI: HAPUS SEMUA LOGIKA DARK MODE ---
 
     // --- Logika Tombol & Menu ---
     const toggleSidebar = () => body.classList.toggle("sidebar-open");
@@ -129,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (attachCameraBtn) attachCameraBtn.addEventListener('click', () => { fileInput.setAttribute('capture', 'environment'); fileInput.setAttribute('accept', 'image/*'); fileInput.click(); });
     if (voiceBtn) voiceBtn.addEventListener('click', () => {
         if (!recognition) {
-            showNotification("Browser Anda tidak mendukung Rekaman Suara. 🎤");
+            showNotification("Browser Anda tidak mendukung Rekaman Suara. ");
             return;
         }
         if (isRecording) {
@@ -209,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!file) return;
         const MAX_FILE_SIZE = 5 * 1024 * 1024;
         if (file.size > MAX_FILE_SIZE) {
-            showNotification("Ukuran file maksimal adalah 5MB. 🚫", true);
+            showNotification("Ukuran file maksimal adalah 5MB. ", true);
             fileInput.value = '';
             return;
         }
@@ -273,9 +251,9 @@ document.addEventListener("DOMContentLoaded", () => {
             seconds++;
             if (generateBtn.querySelector('.stop-timer')) generateBtn.querySelector('.stop-timer').textContent = formatTime(seconds);
         }, 1000);
-        generateBtn.onclick = () => { 
+        generateBtn.onclick = () => {
             abortController.abort();
-            showNotification("Generasi dihentikan. ⏸️");
+            showNotification("Generasi dihentikan. ");
         };
 
         try {
@@ -303,10 +281,10 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             clearInterval(loadingState.intervalId);
             loadingState.element.remove();
-            if (error.name === 'AbortError') { appendMessage('model', 'Respon dihentikan. 🛑'); } 
-            else { 
-                console.error("Error fetching AI response:", error); 
-                appendMessage('model', `Maaf, terjadi kesalahan. 🤖 Error: ${error.message}`);
+            if (error.name === 'AbortError') { appendMessage('model', 'Respon dihentikan. '); }
+            else {
+                console.error("Error fetching AI response:", error);
+                appendMessage('model', `Maaf, terjadi kesalahan.  Error: ${error.message}`);
                 showNotification(`Terjadi kesalahan: ${error.message}`, true);
             }
         } finally {
@@ -318,11 +296,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Event Listener Kirim ---
     if (generateBtn) generateBtn.onclick = handleSendMessage;
-    if (chatInput) chatInput.addEventListener("keydown", (e) => { 
-        if (e.key === "Enter" && !e.shiftKey) { 
-            e.preventDefault(); 
-            handleSendMessage(); 
-        } 
+    if (chatInput) chatInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
+        }
     });
 
     // --- Fungsi Tampilan Pesan ---
@@ -340,7 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (text) {
             const p = document.createElement('p');
             if (role !== 'user' && window.marked) {
-                p.innerHTML = marked.parse(text); 
+                p.innerHTML = marked.parse(text);
             } else {
                 p.textContent = text;
             }
@@ -350,7 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (sourceLinks && sourceLinks.length > 0) {
             const sourcesDiv = document.createElement('div');
             sourcesDiv.className = 'source-links';
-            sourcesDiv.innerHTML = '<p>Sumber:</p><ul>' + 
+            sourcesDiv.innerHTML = '<p>Sumber:</p><ul>' +
                 sourceLinks.map(link => `<li><a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.title || link.url}</a></li>`).join('') +
                 '</ul>';
             messageDiv.appendChild(sourcesDiv);
